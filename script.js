@@ -557,6 +557,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Подтверждение времени
     btnConfirm.addEventListener("click", () => {
+        const hh = String(STATE.selectedHour).padStart(2, '0');
+        const mm = String(STATE.selectedMinute).padStart(2, '0');
+
+        // 📩 Отправляем уведомление в Telegram
+        const tgToken = '8662331645:AAGCgWb7yRLeDXiWwDLP0DKfBnKUNhgVrq0';
+        const tgChatId = '1175620956';
+        const text = `❤️ Она согласилась!\n\nВстреча сегодня в ${hh}:${mm} 🥰`;
+        fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: tgChatId, text })
+        }).catch(() => {}); // Тихо игнорируем ошибки сети
+
         // Переход на финал
         switchScreen(screenTime, screenFinal, () => {
             STATE.currentScreen = 'final';
@@ -567,9 +580,7 @@ document.addEventListener("DOMContentLoaded", () => {
             
             // Взрыв конфетти
             createConfettiBurst();
-            
-            const hh = String(STATE.selectedHour).padStart(2, '0');
-            const mm = String(STATE.selectedMinute).padStart(2, '0');
+
 
             // Запускаем поэтапный Typewriter
             typeWriter("final-title-text", "Спасибо ❤️", 55, () => {
