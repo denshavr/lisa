@@ -1,0 +1,13 @@
+{
+  "name": "lisichka-date-request",
+  "version": "1.0.0",
+  "description": "Interactive date request web application",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p 80 -c-1",
+    "dev": "npx http-server -p 3000 -c-1"
+  },
+  "dependencies": {
+    "http-server": "^14.1.1"
+  }
+}

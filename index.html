@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ты готова провести сегодня время со мной? ❤️</title>
+    <!-- Подключаем шрифты Google Fonts для премиального внешнего вида -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Фоновые интерактивные элементы -->
+    <div class="gradient-bg" id="bg-a"></div>
+    <div class="gradient-bg" id="bg-b" style="opacity:0"></div>
+    <div class="parallax-overlay" id="parallax"></div>
+    <canvas id="background-canvas"></canvas>
+
+    <!-- Основной контейнер-карточка (Glassmorphism) -->
+    <main class="card-container">
+        <div class="card" id="app-card">
+            
+            <!-- ЭКРАН 0: Загрузка -->
+            <section class="screen active" id="screen-loader" aria-hidden="false">
+                <div class="loader-content">
+                    <div class="heart-pulse-icon">❤️</div>
+                    <h2 class="loader-text">Загрузка...</h2>
+                </div>
+            </section>
+
+            <!-- ЭКРАН 1: Главный вопрос -->
+            <section class="screen" id="screen-question" aria-hidden="true">
+                <div class="card-icon">❤️</div>
+                <h1 class="card-title typewriter-container">
+                    <span id="question-text" class="typewriter-text"></span><span class="cursor">|</span>
+                </h1>
+                <div class="btn-group">
+                    <button class="btn btn-yes" id="btn-yes">
+                        <span class="btn-text">Да ❤️</span>
+                    </button>
+                    <!-- Кнопка Нет живёт в body, здесь только якорь для позиционирования -->
+                    <div class="btn-no-anchor" id="btn-no-anchor"></div>
+                </div>
+            </section>
+
+            <!-- ЭКРАН 2: Выбор времени -->
+            <section class="screen" id="screen-time" aria-hidden="true">
+                <div class="card-icon">❤️</div>
+                <h1 class="card-title">Во сколько сегодня тебе удобно?</h1>
+                
+                <div class="time-picker-divider"></div>
+                
+                <!-- Кастомный выбор времени -->
+                <div class="time-picker">
+                    <div class="time-control-group">
+                        <button class="time-btn" id="hour-minus" aria-label="Уменьшить часы">—</button>
+                        <span class="time-value" id="hour-val">19</span>
+                        <button class="time-btn" id="hour-plus" aria-label="Увеличить часы">+</button>
+                    </div>
+                    <div class="time-colon">:</div>
+                    <div class="time-control-group">
+                        <button class="time-btn" id="minute-minus" aria-label="Уменьшить минуты">—</button>
+                        <span class="time-value" id="minute-val">30</span>
+                        <button class="time-btn" id="minute-plus" aria-label="Увеличить минуты">+</button>
+                    </div>
+                </div>
+
+                <div class="time-picker-divider"></div>
+
+                <div class="time-preview" id="time-preview">Сегодня в 19:30 ❤️</div>
+
+                <button class="btn btn-confirm" id="btn-confirm">Подтвердить</button>
+            </section>
+
+            <!-- ЭКРАН 3: Финальный экран -->
+            <section class="screen" id="screen-final" aria-hidden="true">
+                <div class="card-icon success-icon">❤️</div>
+                <h1 class="card-title typewriter-container">
+                    <span id="final-title-text" class="typewriter-text"></span><span class="cursor">|</span>
+                </h1>
+                <p class="final-subheading typewriter-container">
+                    <span id="final-sub-text" class="typewriter-text"></span>
+                </p>
+                <p class="final-extra-text typewriter-container">
+                    <span id="final-extra-text" class="typewriter-text"></span>
+                </p>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Кнопка НЕТ: живёт в body, НИКОГДА не скрывается родителем -->
+    <button class="btn btn-no" id="btn-no">
+        <span class="btn-text">Нет 🙃</span>
+    </button>
+
+    <!-- Всплывающие Toasts сообщения (сверху) -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Модальное окно ошибки (Охотник за кнопками) -->
+    <div class="modal-overlay" id="error-modal" aria-hidden="true" role="dialog">
+        <div class="modal">
+            <div class="modal-icon">⚠️</div>
+            <h2 class="modal-title">Кажется произошла ошибка.</h2>
+            <p class="modal-text">Данный вариант временно недоступен. Попробуйте позже 😄</p>
+            <button class="btn btn-modal-close" id="btn-modal-close">Закрыть</button>
+        </div>
+    </div>
+
+    <!-- Подключаем JavaScript логику -->
+    <script src="script.js"></script>
+</body>
+</html>
