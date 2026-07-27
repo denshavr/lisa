@@ -440,40 +440,31 @@ document.addEventListener("DOMContentLoaded", () => {
         btnNo.querySelector('.btn-text').textContent = 'Нет 🙃';
     }
 
-    // Десктоп: убегаем при наведении
-    btnNo.addEventListener('mouseenter', () => {
-        if (isTouchDevice()) return;
+    // Единый обработчик для ПК и мобильных — одинаковое поведение
+    function handleNoButtonEscape() {
         STATE.noHoverCount++;
 
         jumpNoButton();
 
-        // Меняем надпись
+        // Меняем надпись на кнопке по очереди
         const idx = (STATE.noHoverCount - 1) % noButtonTexts.length;
         btnNo.querySelector('.btn-text').textContent = noButtonTexts[idx];
 
-        // Toast
-        showToast(desktopToasts[Math.floor(Math.random() * desktopToasts.length)]);
+        // Показываем случайный Toast из списка
+        const randomToast = desktopToasts[Math.floor(Math.random() * desktopToasts.length)];
+        showToast(randomToast);
+    }
+
+    // Десктоп: убегаем при наведении
+    btnNo.addEventListener('mouseenter', () => {
+        if (isTouchDevice()) return;
+        handleNoButtonEscape();
     });
 
-    // Мобильные: убегаем при тапе
+    // Мобильные: убегаем при тапе (ровно так же, как на ПК)
     btnNo.addEventListener('touchstart', (e) => {
         e.preventDefault();
-        STATE.mobileTapCount++;
-
-        jumpNoButton();
-
-        const msgs = [
-            '', // 0 — не бывает
-            'Попыток поймать кнопку: 1',
-            'Попыток поймать: 2',
-            'Ты очень настойчивая 😄',
-            `Попыток: ${STATE.mobileTapCount}`,
-            'Я начинаю переживать...',
-            `Попыток: ${STATE.mobileTapCount}`,
-            'Ладно, но нет 😅',
-        ];
-        const msg = msgs[STATE.mobileTapCount] ?? `Попыток: ${STATE.mobileTapCount}`;
-        showToast(msg);
+        handleNoButtonEscape();
     });
 
     // Если каким-то чудом нажали — модальное окно ошибки
