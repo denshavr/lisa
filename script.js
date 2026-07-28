@@ -75,6 +75,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
     initPhotoBackground();
 
+    // ==========================================
+    // ТЕМА ДНЯ И СИСТЕМА ДОСТИЖЕНИЙ
+    // ==========================================
+
+    function initTimeOfDayTheme() {
+        const hour = new Date().getHours();
+        let themeClass = 'theme-evening';
+        let greetingPrefix = '';
+
+        if (hour >= 6 && hour < 12) {
+            themeClass = 'theme-morning';
+            greetingPrefix = 'Доброе утро! 🌅 ';
+        } else if (hour >= 12 && hour < 18) {
+            themeClass = 'theme-day';
+            greetingPrefix = 'Добрый день! ☀️ ';
+        } else if (hour >= 18 && hour < 24) {
+            themeClass = 'theme-evening';
+            greetingPrefix = 'Добрый вечер! 🌙 ';
+        } else {
+            themeClass = 'theme-night';
+            greetingPrefix = 'Доброй ночи! ✨ ';
+        }
+
+        document.body.classList.add(themeClass);
+        return greetingPrefix;
+    }
+
+    const timeGreeting = initTimeOfDayTheme();
+
+    const unlockedAchievements = new Set();
+    function unlockAchievement(id, title) {
+        if (unlockedAchievements.has(id)) return;
+        unlockedAchievements.add(id);
+        setTimeout(() => showToast(title, true), 300);
+    }
+
     // Варианты главного вопроса (случайный выбор при каждом запуске)
     const questionVariants = [
         "Ты готова провести сегодня время со мной?",
@@ -84,7 +120,8 @@ document.addEventListener("DOMContentLoaded", () => {
         "Пойдём гулять? ❤️",
         "Готова к небольшому свиданию?"
     ];
-    const chosenQuestion = questionVariants[Math.floor(Math.random() * questionVariants.length)];
+    const chosenQuestion = timeGreeting + questionVariants[Math.floor(Math.random() * questionVariants.length)];
+
 
 
     // Списки текстов для кнопки "Нет" (десктоп)
@@ -239,16 +276,122 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ==========================================
-    // ПАРАЛЛАКС ФОНА НА ДВИЖЕНИЕ МЫШИ
+    // 3D-НАКЛОН КАРТОЧКИ И ПАРАЛЛАКС ФОНА
     // ==========================================
     
     const parallax = document.getElementById("parallax");
     document.addEventListener("mousemove", (e) => {
-        if (!parallax) return;
-        const x = (e.clientX - window.innerWidth / 2) * 0.02;
-        const y = (e.clientY - window.innerHeight / 2) * 0.02;
-        parallax.style.transform = `translate(${x}px, ${y}px)`;
+        if (parallax) {
+            const x = (e.clientX - window.innerWidth / 2) * 0.02;
+            const y = (e.clientY - window.innerHeight / 2) * 0.02;
+            parallax.style.transform = `translate(${x}px, ${y}px)`;
+        }
+
+        // 3D-наклон карточки за курсором
+        if (card) {
+            const rect = card.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const dx = (e.clientX - centerX) / (window.innerWidth / 2);
+            const dy = (e.clientY - centerY) / (window.innerHeight / 2);
+
+            card.style.transform = `perspective(1000px) rotateY(${dx * 7}deg) rotateX(${-dy * 7}deg)`;
+        }
     });
+
+    document.addEventListener("mouseleave", () => {
+        if (card) card.style.transform = "perspective(1000px) rotateY(0deg) rotateX(0deg)";
+    });
+
+    // Всплеск эмодзи при клике в любом месте
+    document.addEventListener("click", (e) => {
+        if (e.target.closest('button') || e.target.closest('.btn') || e.target.closest('.time-btn')) return;
+        
+        const burstEmojis = ["❤️", "💖", "✨", "🌸", "💕", "🥰", "💫"];
+        for (let i = 0; i < 7; i++) {
+            floatingEmojis.push({
+                x: e.clientX,
+                y: e.clientY,
+                size: Math.floor(Math.random() * 14 + 18),
+                speed: (Math.random() - 0.7) * 4,
+                wind: (Math.random() - 0.5) * 4,
+                opacity: 1.0,
+                emoji: burstEmojis[Math.floor(Math.random() * burstEmojis.length)],
+                angle: Math.random() * Math.PI * 2
+            });
+        }
+    });
+
+    // ==========================================
+    // ФОНОВАЯ МУЗЫКА (WEB AUDIO API SYNTHESIZER)
+    // ==========================================
+
+    let audioCtx = null;
+    let isAudioPlaying = false;
+    let audioTimer = null;
+    const audioToggleBtn = document.getElementById('audio-toggle');
+
+    function playRomanticMelody() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+
+        const chords = [
+            [261.63, 329.63, 392.00, 523.25], // Cmaj
+            [220.00, 261.63, 329.63, 440.00], // Am
+            [174.61, 220.00, 261.63, 349.23], // F
+            [196.00, 246.94, 293.66, 392.00]  // G
+        ];
+        let chordIdx = 0;
+
+        function playNextChord() {
+            if (!isAudioPlaying) return;
+            const now = audioCtx.currentTime;
+            const chord = chords[chordIdx % chords.length];
+            chordIdx++;
+
+            chord.forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now + i * 0.15);
+
+                gain.gain.setValueAtTime(0.001, now + i * 0.15);
+                gain.gain.exponentialRampToValueAtTime(0.04, now + i * 0.15 + 0.3);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.15 + 2.5);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(now + i * 0.15);
+                osc.stop(now + i * 0.15 + 2.6);
+            });
+
+            audioTimer = setTimeout(playNextChord, 2800);
+        }
+
+        playNextChord();
+    }
+
+    if (audioToggleBtn) {
+        audioToggleBtn.addEventListener('click', () => {
+            isAudioPlaying = !isAudioPlaying;
+            if (isAudioPlaying) {
+                audioToggleBtn.textContent = '🔊';
+                playRomanticMelody();
+                showToast('🎵 Музыка включена', true);
+            } else {
+                audioToggleBtn.textContent = '🔇';
+                if (audioTimer) clearTimeout(audioTimer);
+                showToast('🔇 Музыка выключена');
+            }
+        });
+    }
+
 
     // ==========================================
     // CANVAS: ЭМОДЗИ И КОНФЕТТИ
@@ -446,6 +589,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         jumpNoButton();
 
+        // Достижения за попытки
+        if (STATE.noHoverCount === 1) unlockAchievement('doubt_1', '🏆 Первое сомнение');
+        if (STATE.noHoverCount === 5) unlockAchievement('doubt_5', '🏆 Упорная 😼');
+        if (STATE.noHoverCount === 10) unlockAchievement('doubt_10', '🏆 Несгибаемая 💪');
+
         // Меняем надпись на кнопке по очереди
         const idx = (STATE.noHoverCount - 1) % noButtonTexts.length;
         btnNo.querySelector('.btn-text').textContent = noButtonTexts[idx];
@@ -454,6 +602,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const randomToast = desktopToasts[Math.floor(Math.random() * desktopToasts.length)];
         showToast(randomToast);
     }
+
 
     // Десктоп: убегаем при наведении
     btnNo.addEventListener('mouseenter', () => {
@@ -498,6 +647,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Клик на Да
     btnYes.addEventListener("click", () => {
+        unlockAchievement('hover_yes', '🏆 Правильный выбор! ❤️');
+
         // Очищаем таймеры пасхалок
         STATE.easterEggTimers.forEach(timer => clearTimeout(timer));
         
@@ -557,8 +708,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Подтверждение времени
     btnConfirm.addEventListener("click", () => {
+        unlockAchievement('punctual', '🏆 Пунктуальная ⏰');
         const hh = String(STATE.selectedHour).padStart(2, '0');
         const mm = String(STATE.selectedMinute).padStart(2, '0');
+
 
         // 📩 Отправляем уведомление в Telegram
         const tgToken = '8662331645:AAGCgWb7yRLeDXiWwDLP0DKfBnKUNhgVrq0';
@@ -573,6 +726,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Переход на финал
         switchScreen(screenTime, screenFinal, () => {
             STATE.currentScreen = 'final';
+            unlockAchievement('final_reach', '🏆 Мечта сбылась! 🎉');
             
             // Дополнительные эффекты финала
             document.body.classList.add("final-blur");
@@ -581,6 +735,8 @@ document.addEventListener("DOMContentLoaded", () => {
             // Взрыв конфетти
             createConfettiBurst();
 
+            // Таймер обратного отсчета в реальном времени
+            startCountdownTimer();
 
             // Запускаем поэтапный Typewriter
             typeWriter("final-title-text", "Спасибо ❤️", 55, () => {
@@ -596,6 +752,37 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
     });
+
+    // Обратный отсчет до встречи в реальном времени
+    function startCountdownTimer() {
+        const countdownEl = document.getElementById('final-countdown');
+        if (!countdownEl) return;
+
+        function updateTimer() {
+            const now = new Date();
+            const target = new Date();
+            target.setHours(STATE.selectedHour, STATE.selectedMinute, 0, 0);
+
+            if (target <= now) {
+                target.setDate(target.getDate() + 1);
+            }
+
+            const diffMs = target - now;
+            const hours = Math.floor(diffMs / (1000 * 60 * 60));
+            const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+
+            const hhStr = String(hours).padStart(2, '0');
+            const mmStr = String(minutes).padStart(2, '0');
+            const ssStr = String(seconds).padStart(2, '0');
+
+            countdownEl.textContent = `⏳ До нашей встречи: ${hhStr}ч ${mmStr}мин ${ssStr}сек`;
+        }
+
+        updateTimer();
+        setInterval(updateTimer, 1000);
+    }
+
 
     // ==========================================
     // ПАСХАЛКИ ПО ТАЙМЕРУ
