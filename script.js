@@ -195,6 +195,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // ==========================================
     
     function showToast(message, isGolden = false) {
+        // Если накопилось 2 и более тостов — сразу убираем самый старый
+        while (toastContainer.children.length >= 2) {
+            const oldest = toastContainer.firstElementChild;
+            oldest.remove();
+        }
+
         const toast = document.createElement('div');
         toast.className = 'toast';
         if (isGolden) {
@@ -276,7 +282,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ==========================================
-    // 3D-НАКЛОН КАРТОЧКИ И ПАРАЛЛАКС ФОНА
+    // ПАРАЛЛАКС ФОНА НА ДВИЖЕНИЕ МЫШИ
     // ==========================================
     
     const parallax = document.getElementById("parallax");
@@ -286,21 +292,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const y = (e.clientY - window.innerHeight / 2) * 0.02;
             parallax.style.transform = `translate(${x}px, ${y}px)`;
         }
-
-        // 3D-наклон карточки за курсором
-        if (card) {
-            const rect = card.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            const dx = (e.clientX - centerX) / (window.innerWidth / 2);
-            const dy = (e.clientY - centerY) / (window.innerHeight / 2);
-
-            card.style.transform = `perspective(1000px) rotateY(${dx * 7}deg) rotateX(${-dy * 7}deg)`;
-        }
-    });
-
-    document.addEventListener("mouseleave", () => {
-        if (card) card.style.transform = "perspective(1000px) rotateY(0deg) rotateX(0deg)";
     });
 
     // Всплеск эмодзи при клике в любом месте
@@ -326,71 +317,32 @@ document.addEventListener("DOMContentLoaded", () => {
     // ФОНОВАЯ МУЗЫКА (WEB AUDIO API SYNTHESIZER)
     // ==========================================
 
-    let audioCtx = null;
-    let isAudioPlaying = false;
-    let audioTimer = null;
+    // ==========================================
+    // ФОНОВАЯ МУЗЫКА ИЗ ПАПКИ music/
+    // ==========================================
+
+    const bgAudio = new Audio('music/videoplayback (1).m4a');
+    bgAudio.loop = true;
     const audioToggleBtn = document.getElementById('audio-toggle');
-
-    function playRomanticMelody() {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-
-        const chords = [
-            [261.63, 329.63, 392.00, 523.25], // Cmaj
-            [220.00, 261.63, 329.63, 440.00], // Am
-            [174.61, 220.00, 261.63, 349.23], // F
-            [196.00, 246.94, 293.66, 392.00]  // G
-        ];
-        let chordIdx = 0;
-
-        function playNextChord() {
-            if (!isAudioPlaying) return;
-            const now = audioCtx.currentTime;
-            const chord = chords[chordIdx % chords.length];
-            chordIdx++;
-
-            chord.forEach((freq, i) => {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(freq, now + i * 0.15);
-
-                gain.gain.setValueAtTime(0.001, now + i * 0.15);
-                gain.gain.exponentialRampToValueAtTime(0.04, now + i * 0.15 + 0.3);
-                gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.15 + 2.5);
-
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-
-                osc.start(now + i * 0.15);
-                osc.stop(now + i * 0.15 + 2.6);
-            });
-
-            audioTimer = setTimeout(playNextChord, 2800);
-        }
-
-        playNextChord();
-    }
 
     if (audioToggleBtn) {
         audioToggleBtn.addEventListener('click', () => {
-            isAudioPlaying = !isAudioPlaying;
-            if (isAudioPlaying) {
-                audioToggleBtn.textContent = '🔊';
-                playRomanticMelody();
-                showToast('🎵 Музыка включена', true);
+            if (bgAudio.paused) {
+                bgAudio.play().then(() => {
+                    audioToggleBtn.textContent = '🔊';
+                    showToast('🎵 Музыка включена', true);
+                }).catch((err) => {
+                    console.error("Audio playback error:", err);
+                    showToast('🎵 Нажмите ещё раз', true);
+                });
             } else {
+                bgAudio.pause();
                 audioToggleBtn.textContent = '🔇';
-                if (audioTimer) clearTimeout(audioTimer);
                 showToast('🔇 Музыка выключена');
             }
         });
     }
+
 
 
     // ==========================================
