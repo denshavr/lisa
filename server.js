@@ -4,9 +4,9 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
-// Если порт задан в переменных окружения (например, на Amvera - 80), используем его.
-// Иначе для локальной разработки берем 3000
-const PORT = process.env.PORT || 3000;
+// На Amvera нет переменной PORT, а трафик идёт на 80.
+// Локально bat-файл сам задаёт PORT=3000.
+const PORT = process.env.PORT || 80;
 
 app.use(cors());
 app.use(express.json());

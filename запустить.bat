@@ -25,6 +25,7 @@ echo.
 start "" /b cmd /c "timeout /t 2 /nobreak > nul && start msedge --app=http://localhost:3000 --autoplay-policy=no-user-gesture-required"
 
 :: Запускаем сервер (блокирует окно пока работает)
+SET PORT=3000
 npm run dev
 
 pause
