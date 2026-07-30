@@ -445,3 +445,30 @@ body {
     color: rgba(255, 255, 255, 0.4);
 }
 
+/* ==========================================
+   АДАПТИВНОСТЬ ЕЖЕДНЕВНИКА ДЛЯ МОБИЛЬНЫХ
+   ========================================== */
+@media (max-width: 480px) {
+    .planner-container {
+        padding: 12px 10px;
+    }
+
+    .planner-header h1 {
+        font-size: 1.4rem;
+    }
+
+    .widget-card {
+        padding: 14px 14px;
+        border-radius: 14px;
+    }
+
+    .date-selector {
+        padding: 10px 14px;
+        margin-bottom: 18px;
+    }
+
+    #current-date-display {
+        font-size: 1.05rem;
+    }
+}
+
