@@ -1,0 +1,447 @@
+/* ==========================================
+   СТИЛИ ДЛЯ ДАШБОРДА / ТРЕКЕРА
+   ========================================== */
+
+body {
+    background: linear-gradient(135deg, #1a0b2e 0%, #30103b 50%, #4a154b 100%);
+    background-size: cover;
+    background-attachment: fixed;
+}
+
+.planner-container {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    position: relative;
+    z-index: 10;
+}
+
+.planner-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-top: 10px;
+}
+
+.back-btn {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-right: 15px;
+    transition: color 0.2s, transform 0.2s;
+}
+
+.back-btn:hover {
+    color: #fff;
+    transform: translateX(-3px);
+}
+
+.planner-header h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #fff;
+    margin: 0;
+    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.date-selector {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 15px 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.date-nav-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 5px 10px;
+    transition: transform 0.2s;
+}
+
+.date-nav-btn:hover {
+    transform: scale(1.2);
+}
+
+#current-date-display {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    text-transform: capitalize;
+}
+
+/* Виджеты (Категории) */
+.widgets-list {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.widget-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 18px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), background 0.3s;
+    animation: slideUpFade 0.4s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+/* Stagger animation for widgets */
+.widget-card:nth-child(1) { animation-delay: 0.05s; }
+.widget-card:nth-child(2) { animation-delay: 0.1s; }
+.widget-card:nth-child(3) { animation-delay: 0.15s; }
+.widget-card:nth-child(4) { animation-delay: 0.2s; }
+.widget-card:nth-child(5) { animation-delay: 0.25s; }
+.widget-card:nth-child(6) { animation-delay: 0.3s; }
+
+@keyframes slideUpFade {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.widget-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+}
+
+.widget-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.widget-icon {
+    font-size: 1.4rem;
+}
+
+.widget-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+}
+
+/* Инпуты текста */
+.widget-input {
+    width: 100%;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    padding: 12px 15px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    word-break: break-word;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    box-sizing: border-box;
+}
+
+.widget-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px rgba(255, 75, 114, 0.3);
+}
+
+.widget-input::placeholder {
+    color: rgba(255,255,255,0.3);
+}
+
+/* Списки с чекбоксами (Питание, Учеба и т.д.) */
+.checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.check-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* КАСТОМНЫЙ ЧЕКБОКС (АНИМАЦИЯ SVG) */
+.custom-checkbox {
+    position: relative;
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.custom-checkbox input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkbox-box {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 26px;
+    height: 26px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.custom-checkbox input:checked ~ .checkbox-box {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 12px rgba(255, 75, 114, 0.5);
+}
+
+.checkbox-tick {
+    width: 14px;
+    height: 10px;
+    fill: none;
+    stroke: white;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 24;
+    stroke-dashoffset: 24;
+    transition: stroke-dashoffset 0.4s cubic-bezier(0.65, 0, 0.45, 1);
+}
+
+.custom-checkbox input:checked ~ .checkbox-box .checkbox-tick {
+    stroke-dashoffset: 0;
+}
+
+/* Текстовые поля в чеклисте */
+.check-item input[type="text"] {
+    flex-grow: 1;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    outline: none;
+    padding: 2px 0;
+    border-bottom: 1px solid transparent;
+    transition: color 0.3s, text-decoration 0.3s;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+}
+
+.check-item input[type="text"]:focus {
+    border-bottom: 1px solid rgba(255,255,255,0.3);
+}
+
+.custom-checkbox input:checked ~ input[type="text"],
+.check-item input[type="checkbox"]:checked ~ input[type="text"] {
+    text-decoration: line-through;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* Для статики (где текст не редактируется, например Завтрак) */
+.check-label-text {
+    flex-grow: 1;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: color 0.3s, text-decoration 0.3s;
+}
+
+.custom-checkbox input:checked ~ .check-label-text {
+    text-decoration: line-through;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* Динамические тудушки */
+.add-todo-btn {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.6);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    padding: 5px 0;
+    margin-top: 5px;
+    transition: color 0.2s;
+    display: inline-block;
+}
+
+.add-todo-btn:hover {
+    color: #fff;
+}
+
+.delete-todo-btn {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.3);
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0 5px;
+    transition: color 0.2s;
+}
+
+.delete-todo-btn:hover {
+    color: #ff4b72;
+}
+
+
+/* Кнопка добавления категории */
+.btn-add-category {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px dashed rgba(255, 255, 255, 0.3);
+    color: rgba(255,255,255,0.8);
+    width: 100%;
+    padding: 16px;
+    border-radius: 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-bottom: 20px;
+}
+
+.btn-add-category:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255,255,255,0.6);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+/* Модалка (Формы) */
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.modal-input {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.2);
+    color: #fff;
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+.modal-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.modal-label {
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.type-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.type-btn {
+    flex: 1;
+    min-width: 90px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.type-btn.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 15px rgba(255, 75, 114, 0.4);
+}
+
+/* Кнопка удаления кастомного виджета */
+.delete-custom-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 5;
+}
+
+.delete-custom-btn:hover {
+    background: rgba(255, 75, 114, 0.2);
+    border-color: rgba(255, 75, 114, 0.4);
+    color: #ff4b72;
+    transform: scale(1.1);
+}
+
+/* Стилизация многострочного ввода в чеклистах */
+.check-item textarea {
+    flex-grow: 1;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    outline: none;
+    padding: 2px 0;
+    resize: none;
+    overflow: hidden;
+    line-height: 1.4;
+    border-bottom: 1px solid transparent;
+    transition: color 0.3s, text-decoration 0.3s;
+    width: 100%;
+}
+
+.check-item textarea:focus {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.custom-checkbox input:checked ~ textarea {
+    text-decoration: line-through;
+    color: rgba(255, 255, 255, 0.4);
+}
+

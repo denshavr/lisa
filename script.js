@@ -37,7 +37,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function initPhotoBackground() {
         if (photoList.length === 0) return;
-        const shuffled = [...photoList].sort(() => Math.random() - 0.5);
+        const shuffled = [...photoList];
+        // Надежная случайная сортировка Фишера-Йетса
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
 
         // Устанавливаем первое фото на слой A
         if (bgA) {
@@ -190,6 +195,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const errorModal = document.getElementById("error-modal");
     const btnModalClose = document.getElementById("btn-modal-close");
 
+    const calendarModal = document.getElementById("calendar-modal");
+    const calendarToggle = document.getElementById("calendar-toggle");
+    const btnCalendarClose = document.getElementById("btn-calendar-close");
+    const meetingsList = document.getElementById("meetings-list");
+
     // ==========================================
     // ВСПЛЫВАЮЩИЕ УВЕДОМЛЕНИЯ (TOASTS)
     // ==========================================
@@ -323,16 +333,69 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const bgAudio = new Audio('music/videoplayback (1).m4a');
     bgAudio.loop = true;
+    
+    // Восстанавливаем сохраненную громкость из памяти браузера (или ставим 1 по умолчанию)
+    const savedVolume = localStorage.getItem('lisa_music_volume');
+    bgAudio.volume = savedVolume !== null ? parseFloat(savedVolume) : 1;
+    
     const audioToggleBtn = document.getElementById('audio-toggle');
+    const volumeSlider = document.getElementById('volume-slider');
+
+    if (volumeSlider) {
+        // Устанавливаем ползунок в загруженное положение
+        volumeSlider.value = bgAudio.volume;
+        
+        // Сразу меняем иконку, если при загрузке громкость на нуле
+        if (bgAudio.volume === 0 && audioToggleBtn) {
+            audioToggleBtn.textContent = '🔇';
+        }
+
+        volumeSlider.addEventListener('input', (e) => {
+            bgAudio.volume = e.target.value;
+            
+            // Сохраняем новую громкость в localStorage (память браузера)
+            localStorage.setItem('lisa_music_volume', e.target.value);
+            
+            // Если звук убавлен в 0, меняем иконку
+            if (bgAudio.volume === 0) {
+                audioToggleBtn.textContent = '🔇';
+            } else if (!bgAudio.paused) {
+                audioToggleBtn.textContent = '🔊';
+            }
+        });
+    }
+
+    function startMusic() {
+        if (bgAudio.paused) {
+            bgAudio.play().then(() => {
+                if (audioToggleBtn && bgAudio.volume > 0) audioToggleBtn.textContent = '🔊';
+            }).catch(() => {});
+        }
+    }
+
+    // Запуск музыки при любом первом взаимодействии со страницей
+    const handleFirstGesture = () => {
+        startMusic();
+        document.removeEventListener('click', handleFirstGesture);
+        document.removeEventListener('touchstart', handleFirstGesture);
+        document.removeEventListener('scroll', handleFirstGesture);
+        document.removeEventListener('wheel', handleFirstGesture);
+        document.removeEventListener('keydown', handleFirstGesture);
+    };
+    document.addEventListener('click', handleFirstGesture);
+    document.addEventListener('touchstart', handleFirstGesture);
+    document.addEventListener('scroll', handleFirstGesture);
+    document.addEventListener('wheel', handleFirstGesture);
+    document.addEventListener('keydown', handleFirstGesture);
 
     if (audioToggleBtn) {
-        audioToggleBtn.addEventListener('click', () => {
+        audioToggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
             if (bgAudio.paused) {
                 bgAudio.play().then(() => {
                     audioToggleBtn.textContent = '🔊';
                     showToast('🎵 Музыка включена', true);
-                }).catch((err) => {
-                    console.error("Audio playback error:", err);
+                }).catch(() => {
                     showToast('🎵 Нажмите ещё раз', true);
                 });
             } else {
@@ -535,26 +598,61 @@ document.addEventListener("DOMContentLoaded", () => {
         btnNo.querySelector('.btn-text').textContent = 'Нет 🙃';
     }
 
-    // Единый обработчик для ПК и мобильных — одинаковое поведение
+    const reasonModal = document.getElementById("reason-modal");
+    const btnSendReason = document.getElementById("btn-send-reason");
+    const btnReasonClose = document.getElementById("btn-reason-close");
+    const reasonInput = document.getElementById("reason-input");
+
+    // Единый обработчик для ПК и мобильных
     function handleNoButtonEscape() {
         STATE.noHoverCount++;
 
         jumpNoButton();
 
-        // Достижения за попытки
+        // Достижения
         if (STATE.noHoverCount === 1) unlockAchievement('doubt_1', '🏆 Первое сомнение');
-        if (STATE.noHoverCount === 5) unlockAchievement('doubt_5', '🏆 Упорная 😼');
+        if (STATE.noHoverCount === 5) {
+            unlockAchievement('doubt_5', '🏆 Упорная 😼');
+            setTimeout(() => {
+                card.classList.add('blurred');
+                document.body.classList.add('modal-open');
+                reasonModal.classList.add('active');
+                reasonModal.setAttribute('aria-hidden', 'false');
+            }, 400);
+        }
         if (STATE.noHoverCount === 10) unlockAchievement('doubt_10', '🏆 Несгибаемая 💪');
 
-        // Меняем надпись на кнопке по очереди
         const idx = (STATE.noHoverCount - 1) % noButtonTexts.length;
         btnNo.querySelector('.btn-text').textContent = noButtonTexts[idx];
 
-        // Показываем случайный Toast из списка
         const randomToast = desktopToasts[Math.floor(Math.random() * desktopToasts.length)];
         showToast(randomToast);
     }
 
+    // Отправка причины в Telegram
+    btnSendReason.addEventListener('click', () => {
+        const reasonText = reasonInput.value.trim();
+        if (!reasonText) { showToast('⚠️ Напиши пару слов пожалуйста'); return; }
+        const tgToken = '8662331645:AAGCgWb7yRLeDXiWwDLP0DKfBnKUNhgVrq0';
+        const tgChatId = '1175620956';
+        fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: tgChatId, text: `💔 Причина:\n\n"${reasonText}"` })
+        }).catch(() => {});
+        card.classList.remove('blurred');
+        document.body.classList.remove('modal-open');
+        reasonModal.classList.remove('active');
+        reasonModal.setAttribute('aria-hidden', 'true');
+        showToast('Спасибо за ответ ❤️', true);
+    });
+
+    btnReasonClose.addEventListener('click', () => {
+        card.classList.remove('blurred');
+        document.body.classList.remove('modal-open');
+        reasonModal.classList.remove('active');
+        reasonModal.setAttribute('aria-hidden', 'true');
+    });
 
     // Десктоп: убегаем при наведении
     btnNo.addEventListener('mouseenter', () => {
@@ -562,26 +660,78 @@ document.addEventListener("DOMContentLoaded", () => {
         handleNoButtonEscape();
     });
 
-    // Мобильные: убегаем при тапе (ровно так же, как на ПК)
+    // Мобильные: убегаем при тапе
     btnNo.addEventListener('touchstart', (e) => {
         e.preventDefault();
         handleNoButtonEscape();
     });
 
-    // Если каким-то чудом нажали — модальное окно ошибки
+    // Если нажали — модальное окно ошибки
     btnNo.addEventListener('click', () => {
         card.classList.add('blurred');
+        document.body.classList.add('modal-open');
         errorModal.classList.add('active');
         errorModal.setAttribute('aria-hidden', 'false');
         showToast('🏆 Охотник за кнопками', true);
     });
 
-    // Закрытие модального окна
+    // Закрытие модального окна ошибки
     btnModalClose.addEventListener('click', () => {
         card.classList.remove('blurred');
+        document.body.classList.remove('modal-open');
         errorModal.classList.remove('active');
         errorModal.setAttribute('aria-hidden', 'true');
         jumpNoButton();
+    });
+
+    // ==========================================
+    // ЛОГИКА КАЛЕНДАРЯ
+    // ==========================================
+    
+    calendarToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        card.classList.add('blurred');
+        document.body.classList.add('modal-open');
+        calendarModal.classList.add('active');
+        calendarModal.setAttribute('aria-hidden', 'false');
+        
+        // Загрузка встреч с сервера
+        meetingsList.innerHTML = '<div class="meetings-loader">Загрузка...</div>';
+        
+        fetch('/api/meetings')
+            .then(res => res.json())
+            .then(data => {
+                if (!data || data.length === 0) {
+                    meetingsList.innerHTML = '<div class="no-meetings">Пока встреч не запланировано 🥺</div>';
+                    return;
+                }
+                
+                meetingsList.innerHTML = '';
+                // Показываем последние встречи сверху
+                data.reverse().forEach(meeting => {
+                    const item = document.createElement('div');
+                    item.className = 'meeting-item';
+                    
+                    const dateObj = new Date(meeting.timestamp);
+                    const dateStr = dateObj.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+                    
+                    item.innerHTML = `
+                        <div class="meeting-date">${dateStr}</div>
+                        <div class="meeting-time">Запланировано на: ${meeting.time}</div>
+                    `;
+                    meetingsList.appendChild(item);
+                });
+            })
+            .catch(err => {
+                meetingsList.innerHTML = '<div class="no-meetings">Не удалось загрузить список 😔</div>';
+            });
+    });
+
+    btnCalendarClose.addEventListener('click', () => {
+        card.classList.remove('blurred');
+        document.body.classList.remove('modal-open');
+        calendarModal.classList.remove('active');
+        calendarModal.setAttribute('aria-hidden', 'true');
     });
 
     // ==========================================
@@ -674,6 +824,13 @@ document.addEventListener("DOMContentLoaded", () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ chat_id: tgChatId, text })
         }).catch(() => {}); // Тихо игнорируем ошибки сети
+
+        // 💾 Сохраняем встречу на сервере
+        fetch('/api/meetings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ time: `${hh}:${mm}` })
+        }).catch(() => {}); // Если не удалось сохранить, продолжаем без паники
 
         // Переход на финал
         switchScreen(screenTime, screenFinal, () => {

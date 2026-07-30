@@ -18,11 +18,11 @@ for /f "tokens=5" %%a in ('netstat -aon 2^>nul ^| findstr /R ":3000 "') do (
 :: Небольшая пауза чтобы порт освободился
 timeout /t 1 /nobreak > nul
 
-echo  Запускаю сервер...
+echo  Запускаю сервер и открываю окно...
 echo.
 
-:: Открываем браузер через 2 секунды в отдельном процессе
-start "" /b cmd /c "timeout /t 2 /nobreak > nul && start http://localhost:3000"
+:: Открываем приложение (Edge есть на всех современных Windows) с разрешением музыки без клика
+start "" /b cmd /c "timeout /t 2 /nobreak > nul && start msedge --app=http://localhost:3000 --autoplay-policy=no-user-gesture-required"
 
 :: Запускаем сервер (блокирует окно пока работает)
 npm run dev

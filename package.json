@@ -4,10 +4,12 @@
   "description": "Interactive date request web application",
   "main": "index.html",
   "scripts": {
-    "start": "npx http-server -p 80 -c-1",
-    "dev": "npx http-server -p 3000 -c-1"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
   "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
     "http-server": "^14.1.1"
   }
 }
