@@ -14,7 +14,11 @@ app.use(express.json());
 // Отдаем все статические файлы из текущей директории
 app.use(express.static(__dirname));
 
-const MEETINGS_FILE = path.join(__dirname, 'meetings.json');
+// На Amvera данные хранятся в /data (persistent volume), локально — рядом с проектом
+const DATA_DIR = process.env.DATA_DIR || __dirname;
+if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+
+const MEETINGS_FILE = path.join(DATA_DIR, 'meetings.json');
 
 // Чтение встреч
 app.get('/api/meetings', (req, res) => {
@@ -61,7 +65,7 @@ app.post('/api/meetings', (req, res) => {
     });
 });
 
-const PLANNER_DATA_FILE = path.join(__dirname, 'planner_data.json');
+const PLANNER_DATA_FILE = path.join(DATA_DIR, 'planner_data.json');
 
 // --- PLANNER DATA API ---
 app.get('/api/planner/data', (req, res) => {
