@@ -1,15 +1,23 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ты готова провести сегодня время со мной? ❤️</title>
-    <!-- Подключаем шрифты Google Fonts для премиального внешнего вида -->
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Встретимся? ❤️</title> <!-- Цвет панели браузера на телефоне -->
+    <meta name="theme-color" content="#ff4d6d"> <!-- Иконки для вкладки и ярлыка на телефоне -->
+    <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+    <link rel="manifest" href="site.webmanifest"> <!-- Шрифты Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <!-- Фоновые интерактивные элементы -->
     <div class="gradient-bg" id="bg-a"></div>
@@ -20,7 +28,7 @@
     <!-- Основной контейнер-карточка (Glassmorphism) -->
     <main class="card-container">
         <div class="card" id="app-card">
-            
+
             <!-- ЭКРАН 0: Загрузка -->
             <section class="screen active" id="screen-loader" aria-hidden="false">
                 <div class="loader-content">
@@ -48,9 +56,9 @@
             <section class="screen" id="screen-time" aria-hidden="true">
                 <div class="card-icon">❤️</div>
                 <h1 class="card-title">Во сколько сегодня тебе удобно?</h1>
-                
+
                 <div class="time-picker-divider"></div>
-                
+
                 <!-- Кастомный выбор времени -->
                 <div class="time-picker">
                     <div class="time-control-group">
@@ -96,7 +104,8 @@
         <a href="planner.html" class="audio-btn" id="planner-link" aria-label="Открыть ежедневник">📖</a>
         <button class="audio-btn" id="calendar-toggle" aria-label="Открыть список встреч">📅</button>
         <button class="audio-btn" id="audio-toggle" aria-label="Включить / Выключить музыку">🔊</button>
-        <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="1" aria-label="Громкость">
+        <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="1"
+            aria-label="Громкость">
     </div>
     <!-- Кнопка НЕТ: живёт в body, НИКОГДА не скрывается родителем -->
     <button class="btn btn-no" id="btn-no">
@@ -122,7 +131,8 @@
             <div class="modal-icon">🥺</div>
             <h2 class="modal-title">Жаль, что не получается...</h2>
             <p class="modal-text">Напиши, почему не сможешь провести время сегодня?</p>
-            <textarea id="reason-input" class="modal-textarea" placeholder="Напиши причину здесь..." rows="3"></textarea>
+            <textarea id="reason-input" class="modal-textarea" placeholder="Напиши причину здесь..."
+                rows="3"></textarea>
             <div class="modal-btn-group">
                 <button class="btn btn-confirm" id="btn-send-reason">Отправить ❤️</button>
                 <button class="btn btn-modal-close" id="btn-reason-close">Закрыть</button>
@@ -145,4 +155,5 @@
     <!-- Подключаем JavaScript логику -->
     <script src="script.js"></script>
 </body>
+
 </html>
