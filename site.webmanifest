@@ -1,6 +1,6 @@
 {
-    "name": "Встретимся? ❤️",
-    "short_name": "Встретимся?",
+    "name": "Дневничок",
+    "short_name": "Дневничок",
     "start_url": "./",
     "display": "standalone",
     "background_color": "#fff0f5",
