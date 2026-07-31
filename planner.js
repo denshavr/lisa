@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // === УПРАВЛЕНИЕ ДАТАМИ ===
     let currentDate = new Date();
-    
+
     function formatDateKey(date) {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateDateDisplay() {
         const todayKey = formatDateKey(new Date());
         const selectedKey = formatDateKey(currentDate);
-        
+
         const display = document.getElementById('current-date-display');
         if (todayKey === selectedKey) {
             display.textContent = 'Сегодня';
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 display.textContent = currentDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
             }
         }
-        
+
         renderDashboard();
     }
 
@@ -71,8 +71,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return {
             sleepStart: "",
             sleepEnd: "",
+            weightStart: "",
+            weightEnd: "",
             meals: { breakfast: { text: "", done: false }, lunch: { text: "", done: false }, dinner: { text: "", done: false } },
-            workout: { time: "", desc: "" },
+            workout: { startTime: "", endTime: "", desc: "" },
             study: [],
             todos: [],
             customBlocks: [] // Кастомные блоки ТОЛЬКО для этого дня
@@ -132,7 +134,27 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
 
-        // 2. Питание
+        // 2. Вес
+        container.innerHTML += `
+            <div class="widget-card">
+                <div class="widget-header" style="margin-bottom:10px;">
+                    <span class="widget-icon">⚖️</span>
+                    <h3 class="widget-title">Вес</h3>
+                </div>
+                <div style="display:flex; gap:12px; align-items:center;">
+                    <div style="flex:1; display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:0.85rem; color:rgba(255,255,255,0.7); font-weight:600;">Начальный (Утро)</span>
+                        <input type="text" inputmode="decimal" class="widget-input autosave" data-field="weightStart" placeholder="напр. 67" value="${escapeHtml(data.weightStart || "")}">
+                    </div>
+                    <div style="flex:1; display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:0.85rem; color:rgba(255,255,255,0.7); font-weight:600;">Конечный (Вечер)</span>
+                        <input type="text" inputmode="decimal" class="widget-input autosave" data-field="weightEnd" placeholder="напр. 66.3" value="${escapeHtml(data.weightEnd || "")}">
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // 3. Питание
         container.innerHTML += `
             <div class="widget-card">
                 <div class="widget-header">
@@ -140,35 +162,40 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h3 class="widget-title">Питание</h3>
                 </div>
                 <div class="checklist">
-                    ${createCheckboxHtml('meal_breakfast', data.meals?.breakfast?.done, 
-                        `<span class="check-label-text" style="flex:0 0 65px; margin-top:2px;">Завтрак:</span>
+                    ${createCheckboxHtml('meal_breakfast', data.meals?.breakfast?.done,
+            `<span class="check-label-text" style="flex:0 0 65px; margin-top:2px;">Завтрак:</span>
                          <textarea class="autosave" data-field="meals.breakfast.text" placeholder="Что ела?" rows="1">${escapeHtml(data.meals?.breakfast?.text || "")}</textarea>`,
-                        `data-field="meals.breakfast.done"`
-                    )}
-                    ${createCheckboxHtml('meal_lunch', data.meals?.lunch?.done, 
-                        `<span class="check-label-text" style="flex:0 0 65px; margin-top:2px;">Обед:</span>
+            `data-field="meals.breakfast.done"`
+        )}
+                    ${createCheckboxHtml('meal_lunch', data.meals?.lunch?.done,
+            `<span class="check-label-text" style="flex:0 0 65px; margin-top:2px;">Обед:</span>
                          <textarea class="autosave" data-field="meals.lunch.text" placeholder="Что ела?" rows="1">${escapeHtml(data.meals?.lunch?.text || "")}</textarea>`,
-                        `data-field="meals.lunch.done"`
-                    )}
-                    ${createCheckboxHtml('meal_dinner', data.meals?.dinner?.done, 
-                        `<span class="check-label-text" style="flex:0 0 65px; margin-top:2px;">Ужин:</span>
+            `data-field="meals.lunch.done"`
+        )}
+                    ${createCheckboxHtml('meal_dinner', data.meals?.dinner?.done,
+            `<span class="check-label-text" style="flex:0 0 65px; margin-top:2px;">Ужин:</span>
                          <textarea class="autosave" data-field="meals.dinner.text" placeholder="Что ела?" rows="1">${escapeHtml(data.meals?.dinner?.text || "")}</textarea>`,
-                        `data-field="meals.dinner.done"`
-                    )}
+            `data-field="meals.dinner.done"`
+        )}
                 </div>
             </div>
         `;
 
-        // 3. Тренировки
+        // 4. Тренировки
         container.innerHTML += `
             <div class="widget-card">
-                <div class="widget-header">
+                <div class="widget-header" style="margin-bottom:10px;">
                     <span class="widget-icon">🏋️‍♀️</span>
                     <h3 class="widget-title">Тренировки</h3>
                 </div>
-                <div style="display:flex; gap:10px; align-items:center;">
-                    <input type="time" class="widget-input autosave" style="width: 110px; text-align:center" data-field="workout.time" value="${escapeHtml(data.workout?.time || "")}">
-                    <textarea class="autosave" data-field="workout.desc" placeholder="Описание (напр. Йога)" rows="1" style="flex-grow:1; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 12px 15px; color: #fff; font-family: inherit; font-size: 1rem; resize: none; overflow:hidden; outline:none;">${escapeHtml(data.workout?.desc || "")}</textarea>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div style="display:flex; align-items:center; gap:8px; color:#fff; font-weight:600;">
+                        <span>С</span>
+                        <input type="time" class="widget-input autosave" style="width: 110px;" data-field="workout.startTime" value="${escapeHtml(data.workout?.startTime || data.workout?.time || "")}">
+                        <span>До</span>
+                        <input type="time" class="widget-input autosave" style="width: 110px;" data-field="workout.endTime" value="${escapeHtml(data.workout?.endTime || "")}">
+                    </div>
+                    <textarea class="autosave" data-field="workout.desc" placeholder="Описание (напр. Силовая, Йога)" rows="1" style="width:100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 12px 15px; color: #fff; font-family: inherit; font-size: 1rem; resize: none; overflow:hidden; outline:none;">${escapeHtml(data.workout?.desc || "")}</textarea>
                 </div>
             </div>
         `;
@@ -176,14 +203,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // 4. Учеба
         let studyHtml = (data.study || []).map((item, idx) => `
             <div style="display:flex; align-items:center; width:100%">
-                ${createCheckboxHtml(`study_${idx}`, item.done, 
-                    `<textarea class="autosave-arr" data-arr="study" data-idx="${idx}" data-key="task" placeholder="Задача..." rows="1">${escapeHtml(item.task || "")}</textarea>`,
-                    `data-arr="study" data-idx="${idx}" data-key="done"`
-                )}
+                ${createCheckboxHtml(`study_${idx}`, item.done,
+            `<textarea class="autosave-arr" data-arr="study" data-idx="${idx}" data-key="task" placeholder="Задача..." rows="1">${escapeHtml(item.task || "")}</textarea>`,
+            `data-arr="study" data-idx="${idx}" data-key="done"`
+        )}
                 <button class="delete-todo-btn" data-arr="study" data-idx="${idx}">×</button>
             </div>
         `).join('');
-        
+
         container.innerHTML += `
             <div class="widget-card">
                 <div class="widget-header">
@@ -200,14 +227,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // 5. Планы на день
         let todosHtml = (data.todos || []).map((item, idx) => `
             <div style="display:flex; align-items:center; width:100%">
-                ${createCheckboxHtml(`todo_${idx}`, item.done, 
-                    `<textarea class="autosave-arr" data-arr="todos" data-idx="${idx}" data-key="task" placeholder="Задача..." rows="1">${escapeHtml(item.task || "")}</textarea>`,
-                    `data-arr="todos" data-idx="${idx}" data-key="done"`
-                )}
+                ${createCheckboxHtml(`todo_${idx}`, item.done,
+            `<textarea class="autosave-arr" data-arr="todos" data-idx="${idx}" data-key="task" placeholder="Задача..." rows="1">${escapeHtml(item.task || "")}</textarea>`,
+            `data-arr="todos" data-idx="${idx}" data-key="done"`
+        )}
                 <button class="delete-todo-btn" data-arr="todos" data-idx="${idx}">×</button>
             </div>
         `).join('');
-        
+
         container.innerHTML += `
             <div class="widget-card">
                 <div class="widget-header">
@@ -225,21 +252,21 @@ document.addEventListener('DOMContentLoaded', () => {
         data.customBlocks.forEach((block, idx) => {
             let catContent = "";
             const isChecked = block.done === true;
-            
+
             if (block.type === 'text') {
                 // Если тип Текст, делаем галочку и под ней большое поле для ввода
                 catContent = `
                     <div style="display:flex; flex-direction:column; gap:10px;">
-                        ${createCheckboxHtml(`custom_done_${block.id}`, isChecked, 
-                            `<span class="check-label-text">Выполнено</span>`,
-                            `class="autosave-custom-check" data-idx="${idx}"`
-                        )}
+                        ${createCheckboxHtml(`custom_done_${block.id}`, isChecked,
+                    `<span class="check-label-text">Выполнено</span>`,
+                    `class="autosave-custom-check" data-idx="${idx}"`
+                )}
                         <textarea class="widget-input autosave-custom-text" data-idx="${idx}" placeholder="Пиши здесь..." style="min-height: 60px; resize: vertical;">${escapeHtml(block.text || "")}</textarea>
                     </div>
                 `;
             } else if (block.type === 'checkbox') {
                 // Простая галочка
-                catContent = createCheckboxHtml(`custom_check_${block.id}`, isChecked, 
+                catContent = createCheckboxHtml(`custom_check_${block.id}`, isChecked,
                     `<span class="check-label-text">Выполнено</span>`,
                     `class="autosave-custom-check" data-idx="${idx}"`
                 );
@@ -275,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (el.tagName === 'TEXTAREA') {
                 el.style.height = 'auto';
                 el.style.height = el.scrollHeight + 'px';
-                el.addEventListener('input', function() {
+                el.addEventListener('input', function () {
                     this.style.height = 'auto';
                     this.style.height = this.scrollHeight + 'px';
                 });
@@ -337,7 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
             el.style.height = 'auto';
             el.style.height = el.scrollHeight + 'px';
 
-            el.addEventListener('input', function() {
+            el.addEventListener('input', function () {
                 this.style.height = 'auto';
                 this.style.height = this.scrollHeight + 'px';
             });
@@ -377,7 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
             el.style.height = 'auto';
             el.style.height = el.scrollHeight + 'px';
 
-            el.addEventListener('input', function() {
+            el.addEventListener('input', function () {
                 this.style.height = 'auto';
                 this.style.height = this.scrollHeight + 'px';
             });
@@ -446,7 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnSave = document.getElementById('btn-save-category');
     const inputName = document.getElementById('category-name');
     const typeBtns = document.querySelectorAll('.type-btn');
-    
+
     let selectedType = 'checkbox';
 
     btnAdd.addEventListener('click', () => {
@@ -497,16 +524,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function showToast(message) {
         const container = document.getElementById("toast-container");
         if (!container) return;
-        
+
         const toast = document.createElement("div");
         toast.className = "toast";
         toast.textContent = message;
         container.appendChild(toast);
-        
+
         requestAnimationFrame(() => {
             toast.classList.add("show");
         });
-        
+
         setTimeout(() => {
             toast.classList.remove("show");
             setTimeout(() => {
