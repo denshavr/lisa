@@ -137,18 +137,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // 2. Вес
         container.innerHTML += `
             <div class="widget-card">
-                <div class="widget-header" style="margin-bottom:10px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
                     <span class="widget-icon">⚖️</span>
-                    <h3 class="widget-title">Вес</h3>
-                </div>
-                <div style="display:flex; gap:12px; align-items:center;">
-                    <div style="flex:1; display:flex; flex-direction:column; gap:4px;">
-                        <span style="font-size:0.85rem; color:rgba(255,255,255,0.7); font-weight:600;">Начальный (Утро)</span>
-                        <input type="text" inputmode="decimal" class="widget-input autosave" data-field="weightStart" placeholder="напр. 67" value="${escapeHtml(data.weightStart || "")}">
+                    <div style="flex: 0 1 auto;">
+                        <h3 class="widget-title" style="margin: 0 0 2px 0; font-size: 1rem;">Вес</h3>
+                        <span style="font-size: 0.8rem; color: rgba(255,255,255,0.5); font-weight: 500;">Утреннее измерение</span>
                     </div>
-                    <div style="flex:1; display:flex; flex-direction:column; gap:4px;">
-                        <span style="font-size:0.85rem; color:rgba(255,255,255,0.7); font-weight:600;">Конечный (Вечер)</span>
-                        <input type="text" inputmode="decimal" class="widget-input autosave" data-field="weightEnd" placeholder="напр. 66.3" value="${escapeHtml(data.weightEnd || "")}">
+                    <div style="display: flex; align-items: center; gap: 6px; margin-left: 30px;">
+                        <input type="text" inputmode="decimal" class="widget-input autosave" data-field="weightStart" placeholder="—" value="${escapeHtml(data.weightStart || "")}" style="width: 130px; text-align: center; font-size: 1.1rem; font-weight: 700;">
+                        <span style="font-size: 0.9rem; color: rgba(255,255,255,0.5); font-weight: 600;">кг</span>
                     </div>
                 </div>
             </div>
