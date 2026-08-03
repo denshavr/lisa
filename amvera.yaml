@@ -4,10 +4,9 @@ meta:
     name: npm
     version: 20
 build:
-  command: npm install
+  command: npm install --build-from-source=sqlite3
 run:
   command: npm start
   env:
     - name: DATA_DIR
       value: /data
-
