@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
             weightStart: "",
             weightEnd: "",
             meals: { breakfast: { text: "", done: false }, lunch: { text: "", done: false }, dinner: { text: "", done: false } },
-            workout: { startTime: "", endTime: "", desc: "" },
+            workout: { startTime: "", endTime: "", desc: "", walking: false, running: false, load: false },
             study: [],
             todos: [],
             customBlocks: [] // Кастомные блоки ТОЛЬКО для этого дня
@@ -124,13 +124,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="widget-icon">💤</span>
                     <h3 class="widget-title">Сон</h3>
                 </div>
-                <div style="display:flex; align-items:center; gap:10px; color:#fff; font-weight:600; margin-bottom:10px;">
+                <div style="display:flex; align-items:center; justify-content:center; gap:10px; color:#fff; font-weight:600; margin-bottom:10px;">
                     <span>С</span>
-                    <input type="time" class="widget-input autosave" style="width: 110px;" data-field="sleepStart" value="${escapeHtml(data.sleepStart || "")}">
+                    <input type="time" class="widget-input autosave" style="width: 110px; text-align:center;" data-field="sleepStart" value="${escapeHtml(data.sleepStart || "")}">
                     <span>До</span>
-                    <input type="time" class="widget-input autosave" style="width: 110px;" data-field="sleepEnd" value="${escapeHtml(data.sleepEnd || "")}">
+                    <input type="time" class="widget-input autosave" style="width: 110px; text-align:center;" data-field="sleepEnd" value="${escapeHtml(data.sleepEnd || "")}">
                 </div>
-                <div id="sleep-duration-display" style="font-size: 0.95rem; color: rgba(255,255,255,0.75); font-weight: 700;"></div>
+                <div id="sleep-duration-display" style="font-size: 0.95rem; color: rgba(255,255,255,0.75); font-weight: 700; text-align:center;"></div>
             </div>
         `;
 
@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 3. Питание
         container.innerHTML += `
             <div class="widget-card">
-                <div class="widget-header">
+                <div class="widget-header" style="margin-bottom:10px;">
                     <span class="widget-icon">🍽️</span>
                     <h3 class="widget-title">Питание</h3>
                 </div>
@@ -185,12 +185,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="widget-icon">🏋️‍♀️</span>
                     <h3 class="widget-title">Тренировки</h3>
                 </div>
-                <div style="display:flex; flex-direction:column; gap:10px;">
-                    <div style="display:flex; align-items:center; gap:8px; color:#fff; font-weight:600;">
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div style="display:flex; align-items:center; justify-content:center; gap:10px; color:#fff; font-weight:600;">
                         <span>С</span>
-                        <input type="time" class="widget-input autosave" style="width: 110px;" data-field="workout.startTime" value="${escapeHtml(data.workout?.startTime || data.workout?.time || "")}">
+                        <input type="time" class="widget-input autosave" style="width: 110px; text-align:center;" data-field="workout.startTime" value="${escapeHtml(data.workout?.startTime || data.workout?.time || "")}">
                         <span>До</span>
-                        <input type="time" class="widget-input autosave" style="width: 110px;" data-field="workout.endTime" value="${escapeHtml(data.workout?.endTime || "")}">
+                        <input type="time" class="widget-input autosave" style="width: 110px; text-align:center;" data-field="workout.endTime" value="${escapeHtml(data.workout?.endTime || "")}">
+                    </div>
+                    <div style="display:flex; align-items:center; justify-content:space-evenly; gap:8px; flex-wrap:wrap; padding: 4px 0;">
+                        ${createCheckboxHtml('workout_walking', data.workout?.walking, `<span style="color:#fff; font-weight:600; font-size:0.9rem; cursor:pointer;">🚶‍♀️ Ходьба</span>`, `data-field="workout.walking"`)}
+                        ${createCheckboxHtml('workout_running', data.workout?.running, `<span style="color:#fff; font-weight:600; font-size:0.9rem; cursor:pointer;">🏃‍♀️ Бег</span>`, `data-field="workout.running"`)}
+                        ${createCheckboxHtml('workout_load', data.workout?.load, `<span style="color:#fff; font-weight:600; font-size:0.9rem; cursor:pointer;">🏋️‍♀️ Нагрузка</span>`, `data-field="workout.load"`)}
                     </div>
                     <textarea class="autosave" data-field="workout.desc" placeholder="Описание (напр. Силовая, Йога)" rows="1" style="width:100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 12px 15px; color: #fff; font-family: inherit; font-size: 1rem; resize: none; overflow:hidden; outline:none;">${escapeHtml(data.workout?.desc || "")}</textarea>
                 </div>
@@ -210,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         container.innerHTML += `
             <div class="widget-card">
-                <div class="widget-header">
+                <div class="widget-header" style="margin-bottom:10px;">
                     <span class="widget-icon">📚</span>
                     <h3 class="widget-title">Учеба</h3>
                 </div>
@@ -234,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         container.innerHTML += `
             <div class="widget-card">
-                <div class="widget-header">
+                <div class="widget-header" style="margin-bottom:10px;">
                     <span class="widget-icon">✨</span>
                     <h3 class="widget-title">Планы на день</h3>
                 </div>
@@ -321,10 +326,15 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // Чекбоксы простых полей (Питание)
+        // Чекбоксы простых полей (Питание, Тренировки и т.д.)
         document.querySelectorAll('input[type="checkbox"][data-field]').forEach(el => {
             el.addEventListener('change', (e) => {
                 const keys = e.target.getAttribute('data-field').split('.');
+                if (keys.length === 1) data[keys[0]] = e.target.checked;
+                if (keys.length === 2) {
+                    if (!data[keys[0]]) data[keys[0]] = {};
+                    data[keys[0]][keys[1]] = e.target.checked;
+                }
                 if (keys.length === 3) {
                     if (!data[keys[0]]) data[keys[0]] = {};
                     if (!data[keys[0]][keys[1]]) data[keys[0]][keys[1]] = {};

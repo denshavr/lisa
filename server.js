@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const sqlite3 = require('sqlite3').verbose();
 
 const app = express();
 // На Amvera нет переменной PORT, а трафик идёт на 80.
@@ -14,88 +15,160 @@ app.use(express.json());
 // Отдаем все статические файлы из текущей директории
 app.use(express.static(__dirname));
 
-// На Amvera данные хранятся в /data (persistent volume), локально — рядом с проектом
+// На Amvera данные хранятся в /data (persistent volume), локально — в директории проекта
 const DATA_DIR = process.env.DATA_DIR || __dirname;
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
-const MEETINGS_FILE = path.join(DATA_DIR, 'meetings.json');
+const DB_PATH = path.join(DATA_DIR, 'database.sqlite');
 
-// Чтение встреч
+// Инициализация базы данных SQLite
+const db = new sqlite3.Database(DB_PATH, (err) => {
+    if (err) {
+        console.error('Ошибка подключения к базе данных SQLite:', err.message);
+    } else {
+        console.log('Успешное подключение к SQLite базе данных:', DB_PATH);
+        initDatabase();
+    }
+});
+
+function initDatabase() {
+    db.serialize(() => {
+        // Таблица для данных планировщика (date - уникальная дата "YYYY-MM-DD")
+        db.run(`CREATE TABLE IF NOT EXISTS planner_data (
+            date TEXT PRIMARY KEY,
+            blocks TEXT
+        )`);
+
+        // Таблица для встреч
+        db.run(`CREATE TABLE IF NOT EXISTS meetings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            data TEXT,
+            timestamp TEXT
+        )`);
+
+        // Однократная автоматическая миграция со старых JSON файлов, если они есть
+        migrateJsonData();
+    });
+}
+
+function migrateJsonData() {
+    const plannerJsonPath = fs.existsSync(path.join(DATA_DIR, 'planner_data.json'))
+        ? path.join(DATA_DIR, 'planner_data.json')
+        : path.join(__dirname, 'planner_data.json');
+
+    const meetingsJsonPath = fs.existsSync(path.join(DATA_DIR, 'meetings.json'))
+        ? path.join(DATA_DIR, 'meetings.json')
+        : path.join(__dirname, 'meetings.json');
+
+    // Миграция данных планировщика
+    if (fs.existsSync(plannerJsonPath)) {
+        try {
+            const raw = fs.readFileSync(plannerJsonPath, 'utf8');
+            const parsed = JSON.parse(raw || '{}');
+            const stmt = db.prepare(`INSERT OR IGNORE INTO planner_data (date, blocks) VALUES (?, ?)`);
+            for (const [dateKey, blocksVal] of Object.entries(parsed)) {
+                stmt.run(dateKey, JSON.stringify(blocksVal));
+            }
+            stmt.finalize();
+            console.log('Имеющиеся данные planner_data.json импортированы в SQLite.');
+        } catch (e) {
+            console.error('Ошибка чтения planner_data.json при миграции:', e);
+        }
+    }
+
+    // Миграция встреч
+    if (fs.existsSync(meetingsJsonPath)) {
+        try {
+            const raw = fs.readFileSync(meetingsJsonPath, 'utf8');
+            const meetingsArr = JSON.parse(raw || '[]');
+            if (Array.isArray(meetingsArr) && meetingsArr.length > 0) {
+                db.get("SELECT COUNT(*) as count FROM meetings", (err, row) => {
+                    if (!err && row.count === 0) {
+                        const stmt = db.prepare(`INSERT INTO meetings (data, timestamp) VALUES (?, ?)`);
+                        meetingsArr.forEach(m => {
+                            stmt.run(JSON.stringify(m), m.timestamp || new Date().toISOString());
+                        });
+                        stmt.finalize();
+                        console.log('Имеющиеся встречи из meetings.json импортированы в SQLite.');
+                    }
+                });
+            }
+        } catch (e) {
+            console.error('Ошибка чтения meetings.json при миграции:', e);
+        }
+    }
+}
+
+// --- MEETINGS API ---
 app.get('/api/meetings', (req, res) => {
-    fs.readFile(MEETINGS_FILE, 'utf8', (err, data) => {
+    db.all("SELECT * FROM meetings ORDER BY id ASC", [], (err, rows) => {
         if (err) {
-            console.error('Ошибка чтения файла встреч:', err);
+            console.error('Ошибка чтения встреч из БД:', err);
             return res.status(500).json({ error: 'Не удалось прочитать встречи' });
         }
-        try {
-            const meetings = JSON.parse(data || '[]');
-            res.json(meetings);
-        } catch (e) {
-            res.json([]);
-        }
+        const meetings = (rows || []).map(r => {
+            try {
+                const parsed = JSON.parse(r.data);
+                return { ...parsed, id: r.id, timestamp: r.timestamp };
+            } catch (e) {
+                return { id: r.id, timestamp: r.timestamp };
+            }
+        });
+        res.json(meetings);
     });
 });
 
-// Добавление новой встречи
 app.post('/api/meetings', (req, res) => {
     const newMeeting = req.body;
-    
-    // Добавляем время сохранения на сервере
-    newMeeting.timestamp = new Date().toISOString();
+    const timestamp = new Date().toISOString();
+    newMeeting.timestamp = timestamp;
+    const dataStr = JSON.stringify(newMeeting);
 
-    fs.readFile(MEETINGS_FILE, 'utf8', (err, data) => {
-        let meetings = [];
-        if (!err && data) {
-            try {
-                meetings = JSON.parse(data);
-            } catch (e) {
-                meetings = [];
-            }
+    db.run("INSERT INTO meetings (data, timestamp) VALUES (?, ?)", [dataStr, timestamp], function (err) {
+        if (err) {
+            console.error('Ошибка сохранения встречи в БД:', err);
+            return res.status(500).json({ error: 'Не удалось сохранить встречу' });
         }
-        
-        meetings.push(newMeeting);
-        
-        fs.writeFile(MEETINGS_FILE, JSON.stringify(meetings, null, 2), (err) => {
-            if (err) {
-                console.error('Ошибка сохранения файла встреч:', err);
-                return res.status(500).json({ error: 'Не удалось сохранить встречу' });
-            }
-            res.status(201).json({ success: true, meeting: newMeeting });
-        });
+        res.status(201).json({ success: true, meeting: { ...newMeeting, id: this.lastID } });
     });
 });
-
-const PLANNER_DATA_FILE = path.join(DATA_DIR, 'planner_data.json');
 
 // --- PLANNER DATA API ---
 app.get('/api/planner/data', (req, res) => {
-    fs.readFile(PLANNER_DATA_FILE, 'utf8', (err, data) => {
-        if (err) return res.status(500).json({ error: 'Ошибка чтения данных' });
-        try {
-            res.json(JSON.parse(data || '{}'));
-        } catch (e) {
-            res.json({});
+    db.all("SELECT date, blocks FROM planner_data", [], (err, rows) => {
+        if (err) {
+            console.error('Ошибка чтения данных планера из БД:', err);
+            return res.status(500).json({ error: 'Ошибка чтения данных' });
         }
+        const result = {};
+        (rows || []).forEach(r => {
+            try {
+                result[r.date] = JSON.parse(r.blocks);
+            } catch (e) {
+                result[r.date] = {};
+            }
+        });
+        res.json(result);
     });
 });
 
 app.post('/api/planner/data', (req, res) => {
-    // Ожидаем { date: "YYYY-MM-DD", blocks: [...] }
     const { date, blocks } = req.body;
-    
-    fs.readFile(PLANNER_DATA_FILE, 'utf8', (err, data) => {
-        let allData = {};
-        if (!err && data) {
-            try { allData = JSON.parse(data); } catch(e) {}
-        }
-        
-        allData[date] = blocks;
-        
-        fs.writeFile(PLANNER_DATA_FILE, JSON.stringify(allData, null, 2), (err) => {
-            if (err) return res.status(500).json({ error: 'Ошибка сохранения данных' });
+    if (!date) return res.status(400).json({ error: 'Дата не указана' });
+
+    const blocksStr = JSON.stringify(blocks || {});
+    db.run(
+        `INSERT INTO planner_data (date, blocks) VALUES (?, ?)
+         ON CONFLICT(date) DO UPDATE SET blocks=excluded.blocks`,
+        [date, blocksStr],
+        (err) => {
+            if (err) {
+                console.error('Ошибка сохранения планера в БД:', err);
+                return res.status(500).json({ error: 'Ошибка сохранения данных' });
+            }
             res.status(200).json({ success: true });
-        });
-    });
+        }
+    );
 });
 
 app.listen(PORT, () => {
