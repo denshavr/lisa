@@ -15,11 +15,23 @@ app.use(express.json());
 // Отдаем все статические файлы из текущей директории
 app.use(express.static(__dirname));
 
-// На Amvera данные хранятся в /data (persistent volume), локально — в директории проекта
+// На Amvera данные хранятся в постоянном хранилище /data
 const DATA_DIR = process.env.DATA_DIR || __dirname;
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
 const DB_PATH = path.join(DATA_DIR, 'database.sqlite');
+const LOCAL_SEED_DB = path.join(__dirname, 'database.sqlite');
+
+// Если мы на Amvera (/data) и файл /data/database.sqlite еще не существует,
+// копируем существуюущую базу данных database.sqlite из репозитория в /data/database.sqlite
+if (DATA_DIR !== __dirname && !fs.existsSync(DB_PATH) && fs.existsSync(LOCAL_SEED_DB)) {
+    try {
+        fs.copyFileSync(LOCAL_SEED_DB, DB_PATH);
+        console.log('Существующая база database.sqlite скопирована в постоянное хранилище /data/database.sqlite');
+    } catch (e) {
+        console.error('Ошибка копирования базы данных в /data:', e);
+    }
+}
 
 let db;
 
@@ -35,13 +47,13 @@ function saveDb() {
     }
 }
 
-// Инициализация WebAssembly SQLite (работает везде без бинарных зависимостей)
+// Инициализация WebAssembly SQLite
 initSqlJs().then((SQL) => {
     try {
         if (fs.existsSync(DB_PATH)) {
             const filebuffer = fs.readFileSync(DB_PATH);
             db = new SQL.Database(filebuffer);
-            console.log('Успешно загружена база данных SQLite из файла:', DB_PATH);
+            console.log('Успешно загружена база данных SQLite из:', DB_PATH);
         } else {
             db = new SQL.Database();
             console.log('Создана новая база данных SQLite.');
@@ -68,51 +80,7 @@ function initDatabase() {
         timestamp TEXT
     )`);
 
-    // Однократный импорт со старых JSON файлов при необходимости
-    migrateJsonData();
     saveDb();
-}
-
-function migrateJsonData() {
-    const plannerJsonPath = fs.existsSync(path.join(DATA_DIR, 'planner_data.json'))
-        ? path.join(DATA_DIR, 'planner_data.json')
-        : path.join(__dirname, 'planner_data.json');
-
-    const meetingsJsonPath = fs.existsSync(path.join(DATA_DIR, 'meetings.json'))
-        ? path.join(DATA_DIR, 'meetings.json')
-        : path.join(__dirname, 'meetings.json');
-
-    if (fs.existsSync(plannerJsonPath)) {
-        try {
-            const raw = fs.readFileSync(plannerJsonPath, 'utf8');
-            const parsed = JSON.parse(raw || '{}');
-            for (const [dateKey, blocksVal] of Object.entries(parsed)) {
-                db.run(`INSERT OR IGNORE INTO planner_data (date, blocks) VALUES (?, ?)`, [dateKey, JSON.stringify(blocksVal)]);
-            }
-            console.log('Имеющиеся данные planner_data.json импортированы в SQLite.');
-        } catch (e) {
-            console.error('Ошибка миграции planner_data.json:', e);
-        }
-    }
-
-    if (fs.existsSync(meetingsJsonPath)) {
-        try {
-            const raw = fs.readFileSync(meetingsJsonPath, 'utf8');
-            const meetingsArr = JSON.parse(raw || '[]');
-            if (Array.isArray(meetingsArr) && meetingsArr.length > 0) {
-                const res = db.exec("SELECT COUNT(*) as count FROM meetings");
-                const count = (res[0] && res[0].values[0] && res[0].values[0][0]) || 0;
-                if (count === 0) {
-                    meetingsArr.forEach(m => {
-                        db.run(`INSERT INTO meetings (data, timestamp) VALUES (?, ?)`, [JSON.stringify(m), m.timestamp || new Date().toISOString()]);
-                    });
-                    console.log('Имеющиеся встречи из meetings.json импортированы в SQLite.');
-                }
-            }
-        } catch (e) {
-            console.error('Ошибка миграции meetings.json:', e);
-        }
-    }
 }
 
 // Преобразование результата exec в массив объектов
