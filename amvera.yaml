@@ -4,7 +4,7 @@ meta:
     name: npm
     version: 20
 build:
-  command: npm install --build-from-source=sqlite3
+  command: npm install
 run:
   command: npm start
   env:
