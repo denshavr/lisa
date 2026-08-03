@@ -5,9 +5,15 @@
   "main": "index.html",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "build:www": "node -e \"const fs = require('fs'), path = require('path'); if (!fs.existsSync('www')) fs.mkdirSync('www'); ['index.html', 'planner.html', 'planner.js', 'planner.css', 'style.css', 'script.js', 'icon-192.png', 'icon-512.png', 'site.webmanifest'].forEach(f => { if (fs.existsSync(f)) fs.copyFileSync(f, path.join('www', f)); });\"",
+    "cap:sync": "npm run build:www && npx cap sync",
+    "cap:open": "npx cap open android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/core": "^8.5.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "http-server": "^14.1.1",

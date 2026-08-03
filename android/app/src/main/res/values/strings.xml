@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Дневничок</string>
+    <string name="title_activity_main">Дневничок</string>
+    <string name="package_name">com.lisichka.tracker</string>
+    <string name="custom_url_scheme">com.lisichka.tracker</string>
+
+    <!-- <string name="app_name">lisa</string> -->
+
+    <!-- <string name="title_activity_main">lisa</string> -->
+
+    <!-- <string name="package_name">com.example.app</string> -->
+
+    <!-- <string name="custom_url_scheme">com.example.app</string> -->
+</resources>

@@ -20,7 +20,11 @@
     <main class="planner-container">
         <header class="planner-header">
             <a href="index.html" class="back-btn" aria-label="Назад">← Назад</a>
-            <h1>Трекер 📊</h1>
+            <h1 id="planner-title">Трекер 📊</h1>
+            <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+                <span id="network-status-badge" class="network-status-badge" title="Статус подключения">🌐</span>
+                <button id="profile-toggle-btn" class="profile-toggle-btn" title="Переключить профиль">👦</button>
+            </div>
         </header>
 
         <section class="date-selector">

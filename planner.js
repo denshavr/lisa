@@ -39,32 +39,203 @@ document.addEventListener('DOMContentLoaded', () => {
         updateDateDisplay();
     });
 
-    // === СОСТОЯНИЕ ===
-    let allData = {}; // из planner_data.json
+    // === СОСТОЯНИЕ И ПРОФИЛИ ===
+    let allData = {};
+    let currentProfile = localStorage.getItem('currentProfile') || 'girl';
 
-    // === API CALLS ===
-    async function loadData() {
-        try {
-            const res = await fetch('/api/planner/data');
-            if (res.ok) allData = await res.json();
-        } catch (e) {
-            console.error('Ошибка загрузки', e);
+    function updateProfileUI() {
+        const toggleBtn = document.getElementById('profile-toggle-btn');
+        if (!toggleBtn) return;
+        if (currentProfile === 'girl') {
+            toggleBtn.textContent = '👦';
+            toggleBtn.title = 'Профиль Дани';
+        } else {
+            toggleBtn.textContent = '👧';
+            toggleBtn.title = 'Профиль Леры';
         }
+    }
+
+    const profileToggleBtn = document.getElementById('profile-toggle-btn');
+    if (profileToggleBtn) {
+        profileToggleBtn.addEventListener('click', () => {
+            currentProfile = (currentProfile === 'girl') ? 'boy' : 'girl';
+            localStorage.setItem('currentProfile', currentProfile);
+            updateProfileUI();
+            showToast(currentProfile === 'boy' ? 'Профиль Дани 👦' : 'Профиль Леры 👧');
+            renderDashboard();
+        });
+    }
+
+    // === ОФЛАЙН ХРАНИЛИЩЕ И СИНХРОНИЗАЦИЯ ===
+    const LOCAL_CACHE_KEY = 'lisichka_planner_local_v1';
+    const PENDING_SYNC_KEY = 'lisichka_pending_sync_dates';
+
+    function getPendingSyncDates() {
+        try {
+            return JSON.parse(localStorage.getItem(PENDING_SYNC_KEY) || '[]');
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function addPendingSyncDate(dateKey) {
+        const set = new Set(getPendingSyncDates());
+        set.add(dateKey);
+        localStorage.setItem(PENDING_SYNC_KEY, JSON.stringify(Array.from(set)));
+        updateNetworkBadge();
+    }
+
+    function removePendingSyncDate(dateKey) {
+        const set = new Set(getPendingSyncDates());
+        set.delete(dateKey);
+        localStorage.setItem(PENDING_SYNC_KEY, JSON.stringify(Array.from(set)));
+        updateNetworkBadge();
+    }
+
+    function saveLocalCache() {
+        try {
+            localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(allData));
+        } catch (e) {
+            console.error('Ошибка записи локального кэша', e);
+        }
+    }
+
+    function loadLocalCache() {
+        try {
+            const raw = localStorage.getItem(LOCAL_CACHE_KEY);
+            if (raw) allData = JSON.parse(raw);
+        } catch (e) {
+            console.error('Ошибка чтения локального кэша', e);
+        }
+    }
+
+    function updateNetworkBadge() {
+        const badge = document.getElementById('network-status-badge');
+        if (!badge) return;
+        const isOnline = navigator.onLine;
+        const pendingCount = getPendingSyncDates().length;
+
+        if (!isOnline || pendingCount > 0) {
+            badge.textContent = '⚡';
+            badge.title = isOnline ? 'Есть несинхронизированные локальные данные' : 'Режим офлайн';
+        } else {
+            badge.textContent = '🌐';
+            badge.title = 'Подключено и синхронизировано';
+        }
+    }
+
+    window.addEventListener('online', () => {
+        updateNetworkBadge();
+        syncPendingData();
+    });
+
+    window.addEventListener('offline', updateNetworkBadge);
+
+    async function syncPendingData() {
+        if (!navigator.onLine) return;
+        const pendingDates = getPendingSyncDates();
+        if (pendingDates.length === 0) return;
+
+        for (const dateKey of pendingDates) {
+            if (allData[dateKey]) {
+                try {
+                    const res = await fetch('/api/planner/data', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ date: dateKey, blocks: allData[dateKey] })
+                    });
+                    if (res.ok) {
+                        removePendingSyncDate(dateKey);
+                    }
+                } catch (e) {
+                    console.error('Ошибка фоновой синхронизации даты', dateKey, e);
+                }
+            }
+        }
+        updateNetworkBadge();
+    }
+
+    // === API CALLS & СИНХРОНИЗАЦИЯ ===
+    async function loadData() {
+        loadLocalCache();
+        updateProfileUI();
         updateDateDisplay();
+        updateNetworkBadge();
+
+        if (navigator.onLine) {
+            try {
+                const res = await fetch('/api/planner/data');
+                if (res.ok) {
+                    const serverData = await res.json();
+                    for (const [dKey, dBlocks] of Object.entries(serverData)) {
+                        if (!allData[dKey]) {
+                            allData[dKey] = dBlocks;
+                        } else {
+                            ensureProfileStructure(dKey);
+                            if (dBlocks && dBlocks.girl) allData[dKey].girl = { ...dBlocks.girl, ...allData[dKey].girl };
+                            if (dBlocks && dBlocks.boy) allData[dKey].boy = { ...dBlocks.boy, ...allData[dKey].boy };
+                        }
+                    }
+                    saveLocalCache();
+                    renderDashboard();
+                }
+            } catch (e) {
+                console.error('Ошибка загрузки с сервера', e);
+            }
+            syncPendingData();
+        }
+    }
+
+    function ensureProfileStructure(dateKey) {
+        if (!allData[dateKey]) {
+            allData[dateKey] = {
+                girl: getEmptyDayData(),
+                boy: getEmptyDayData()
+            };
+            return;
+        }
+
+        // Если пришел старый единичный формат без ключей girl/boy
+        if (!allData[dateKey].girl && !allData[dateKey].boy) {
+            const oldData = { ...allData[dateKey] };
+            if (!oldData.customBlocks) oldData.customBlocks = [];
+            allData[dateKey] = {
+                girl: oldData,
+                boy: getEmptyDayData()
+            };
+        } else {
+            if (!allData[dateKey].girl) allData[dateKey].girl = getEmptyDayData();
+            if (!allData[dateKey].boy) allData[dateKey].boy = getEmptyDayData();
+            if (!allData[dateKey].girl.customBlocks) allData[dateKey].girl.customBlocks = [];
+            if (!allData[dateKey].boy.customBlocks) allData[dateKey].boy.customBlocks = [];
+        }
     }
 
     async function saveCurrentDayData() {
         const dateKey = formatDateKey(currentDate);
-        const dayData = allData[dateKey] || getEmptyDayData();
-        try {
-            await fetch('/api/planner/data', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ date: dateKey, blocks: dayData })
-            });
-        } catch (e) {
-            console.error('Ошибка сохранения данных', e);
+        ensureProfileStructure(dateKey);
+        saveLocalCache();
+
+        if (navigator.onLine) {
+            try {
+                const res = await fetch('/api/planner/data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ date: dateKey, blocks: allData[dateKey] })
+                });
+                if (res.ok) {
+                    removePendingSyncDate(dateKey);
+                } else {
+                    addPendingSyncDate(dateKey);
+                }
+            } catch (e) {
+                console.error('Ошибка сохранения на сервер', e);
+                addPendingSyncDate(dateKey);
+            }
+        } else {
+            addPendingSyncDate(dateKey);
         }
+        updateNetworkBadge();
     }
 
     function getEmptyDayData() {
@@ -83,14 +254,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getDayData() {
         const dateKey = formatDateKey(currentDate);
-        if (!allData[dateKey]) {
-            allData[dateKey] = getEmptyDayData();
-        }
-        // Защита от старых данных без customBlocks
-        if (!allData[dateKey].customBlocks) {
-            allData[dateKey].customBlocks = [];
-        }
-        return allData[dateKey];
+        ensureProfileStructure(dateKey);
+        return allData[dateKey][currentProfile];
     }
 
     // === КОМПОНЕНТЫ UI ===

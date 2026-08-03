@@ -1,6 +1,37 @@
+# === Node.js ===
 node_modules/
-.DS_Store
+npm-debug.log*
+.npm
+
+# === Локальная база данных ===
 *.sqlite3
 *.db
 *.sqlite-journal
+# Трекинг начального database.sqlite для Амверы
 !database.sqlite
+
+# === Временные файлы ===
+.DS_Store
+Thumbs.db
+*.log
+
+# === Capacitor: www (сборка) ===
+www/
+
+# === Android: шаблонные тесты (не нужны) ===
+android/app/src/androidTest/
+android/app/src/test/
+
+# === Android Build Artifacts ===
+android/app/build/
+android/.gradle/
+android/build/
+android/local.properties
+android/.idea/
+android/*.iml
+android/app/*.iml
+android/captures/
+android/.navigation/
+android/gradlew
+android/gradlew.bat
+android/gradle/
