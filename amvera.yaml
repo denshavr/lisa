@@ -3,12 +3,11 @@ meta:
   toolchain:
     name: npm
     version: 20
-build:
-  command: npm install
 run:
   command: npm start
   persistenceMount: /data
   env:
     - name: DATA_DIR
       value: /data
-
+    - name: PORT
+      value: "80"
