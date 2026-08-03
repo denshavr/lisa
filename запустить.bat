@@ -4,6 +4,13 @@ title Лисичка ❤️
 
 cd /d "%~dp0"
 
+if not exist node_modules (
+    echo.
+    echo  Устанавливаю необходимые зависимости (express, sqlite3, cors)...
+    echo.
+    call npm install
+)
+
 echo.
 echo  Останавливаю предыдущий сервер на порту 3000...
 echo.

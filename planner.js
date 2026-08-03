@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
             weightStart: "",
             weightEnd: "",
             meals: { breakfast: { text: "", done: false }, lunch: { text: "", done: false }, dinner: { text: "", done: false } },
-            workout: { startTime: "", endTime: "", desc: "" },
+            workout: { startTime: "", endTime: "", desc: "", walking: false, running: false, load: false },
             study: [],
             todos: [],
             customBlocks: [] // Кастомные блоки ТОЛЬКО для этого дня
@@ -191,6 +191,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         <input type="time" class="widget-input autosave" style="width: 110px;" data-field="workout.startTime" value="${escapeHtml(data.workout?.startTime || data.workout?.time || "")}">
                         <span>До</span>
                         <input type="time" class="widget-input autosave" style="width: 110px;" data-field="workout.endTime" value="${escapeHtml(data.workout?.endTime || "")}">
+                    </div>
+                    <div class="workout-checks-row">
+                        <label class="workout-check-label">
+                            <input type="checkbox" class="workout-check" data-field="workout.walking" ${data.workout?.walking ? 'checked' : ''}>
+                            <span class="workout-check-text">🚶 Ходьба</span>
+                        </label>
+                        <label class="workout-check-label">
+                            <input type="checkbox" class="workout-check" data-field="workout.running" ${data.workout?.running ? 'checked' : ''}>
+                            <span class="workout-check-text">🏃 Бег</span>
+                        </label>
+                        <label class="workout-check-label">
+                            <input type="checkbox" class="workout-check" data-field="workout.load" ${data.workout?.load ? 'checked' : ''}>
+                            <span class="workout-check-text">💪 Нагрузка</span>
+                        </label>
                     </div>
                     <textarea class="autosave" data-field="workout.desc" placeholder="Описание (напр. Силовая, Йога)" rows="1" style="width:100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 12px 15px; color: #fff; font-family: inherit; font-size: 1rem; resize: none; overflow:hidden; outline:none;">${escapeHtml(data.workout?.desc || "")}</textarea>
                 </div>
@@ -321,10 +335,14 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // Чекбоксы простых полей (Питание)
+        // Чекбоксы простых полей (Питание, Тренировки)
         document.querySelectorAll('input[type="checkbox"][data-field]').forEach(el => {
             el.addEventListener('change', (e) => {
                 const keys = e.target.getAttribute('data-field').split('.');
+                if (keys.length === 2) {
+                    if (!data[keys[0]]) data[keys[0]] = {};
+                    data[keys[0]][keys[1]] = e.target.checked;
+                }
                 if (keys.length === 3) {
                     if (!data[keys[0]]) data[keys[0]] = {};
                     if (!data[keys[0]][keys[1]]) data[keys[0]][keys[1]] = {};
