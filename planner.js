@@ -43,6 +43,23 @@ document.addEventListener('DOMContentLoaded', () => {
     let allData = {};
     let currentProfile = localStorage.getItem('currentProfile') || 'girl';
 
+    function getApiUrl(endpoint) {
+        if (window.location.hostname === 'localhost' && window.location.port === '3000') {
+            return endpoint;
+        }
+        const isCapacitor = window.location.hostname === 'localhost' && window.location.port === '' || 
+                            window.location.origin.startsWith('capacitor://') || 
+                            window.location.origin.startsWith('file://');
+        if (isCapacitor) {
+            let savedUrl = localStorage.getItem('amvera_server_url') || 'https://lisichka-date-request.amvera.media';
+            if (savedUrl.endsWith('/')) {
+                savedUrl = savedUrl.slice(0, -1);
+            }
+            return savedUrl + endpoint;
+        }
+        return endpoint;
+    }
+
     function updateProfileUI() {
         const toggleBtn = document.getElementById('profile-toggle-btn');
         if (!toggleBtn) return;
@@ -115,13 +132,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const isOnline = navigator.onLine;
         const pendingCount = getPendingSyncDates().length;
 
+        badge.style.cursor = 'pointer'; // Делаем иконку кликабельной
         if (!isOnline || pendingCount > 0) {
             badge.textContent = '⚡';
-            badge.title = isOnline ? 'Есть несинхронизированные локальные данные' : 'Режим офлайн';
+            badge.title = isOnline ? 'Есть несинхронизированные локальные данные (Клик для настройки сервера)' : 'Режим офлайн (Клик для настройки сервера)';
         } else {
             badge.textContent = '🌐';
-            badge.title = 'Подключено и синхронизировано';
+            badge.title = 'Подключено и синхронизировано (Клик для настройки сервера)';
         }
+    }
+
+    // Добавляем обработчик клика на индикатор сети для настройки адреса сервера
+    const netBadge = document.getElementById('network-status-badge');
+    if (netBadge) {
+        netBadge.addEventListener('click', () => {
+            const currentUrl = localStorage.getItem('amvera_server_url') || 'https://lisichka-date-request.amvera.media';
+            const newUrl = prompt('Введите адрес сервера Amvera для синхронизации:', currentUrl);
+            if (newUrl !== null) {
+                const trimmed = newUrl.trim();
+                if (trimmed) {
+                    localStorage.setItem('amvera_server_url', trimmed);
+                    showToast('Адрес сервера изменен! Синхронизирую...');
+                    loadData();
+                }
+            }
+        });
     }
 
     window.addEventListener('online', () => {
@@ -139,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
         for (const dateKey of pendingDates) {
             if (allData[dateKey]) {
                 try {
-                    const res = await fetch('/api/planner/data', {
+                    const res = await fetch(getApiUrl('/api/planner/data'), {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ date: dateKey, blocks: allData[dateKey] })
@@ -164,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (navigator.onLine) {
             try {
-                const res = await fetch('/api/planner/data');
+                const res = await fetch(getApiUrl('/api/planner/data'));
                 if (res.ok) {
                     const serverData = await res.json();
                     for (const [dKey, dBlocks] of Object.entries(serverData)) {
@@ -215,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (navigator.onLine) {
             try {
-                const res = await fetch('/api/planner/data', {
+                const res = await fetch(getApiUrl('/api/planner/data'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ date: dateKey, blocks: allData[dateKey] })

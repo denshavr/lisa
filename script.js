@@ -15,6 +15,23 @@ document.addEventListener("DOMContentLoaded", () => {
         easterEggTimers: []
     };
 
+    function getApiUrl(endpoint) {
+        if (window.location.hostname === 'localhost' && window.location.port === '3000') {
+            return endpoint;
+        }
+        const isCapacitor = window.location.hostname === 'localhost' && window.location.port === '' || 
+                            window.location.origin.startsWith('capacitor://') || 
+                            window.location.origin.startsWith('file://');
+        if (isCapacitor) {
+            let savedUrl = localStorage.getItem('amvera_server_url') || 'https://lisichka-date-request.amvera.media';
+            if (savedUrl.endsWith('/')) {
+                savedUrl = savedUrl.slice(0, -1);
+            }
+            return savedUrl + endpoint;
+        }
+        return endpoint;
+    }
+
     // ==========================================
     // ФОТО-ФОН: БЕСШОВНАЯ СМЕНА ИЗОБРАЖЕНИЙ (2 СЛОЯ)
     // ==========================================
@@ -698,7 +715,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Загрузка встреч с сервера
         meetingsList.innerHTML = '<div class="meetings-loader">Загрузка...</div>';
         
-        fetch('/api/meetings')
+        fetch(getApiUrl('/api/meetings'))
             .then(res => res.json())
             .then(data => {
                 if (!data || data.length === 0) {
@@ -826,7 +843,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }).catch(() => {}); // Тихо игнорируем ошибки сети
 
         // 💾 Сохраняем встречу на сервере
-        fetch('/api/meetings', {
+        fetch(getApiUrl('/api/meetings'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ time: `${hh}:${mm}` })
@@ -915,4 +932,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         STATE.easterEggTimers.push(egg1, egg2, egg3);
     }
+
+    // Репозиционируем кнопку "Нет" при ресайзе и скролле, если она еще не прыгала
+    window.addEventListener('resize', () => {
+        if (STATE.noHoverCount === 0 && btnNo.classList.contains('visible')) {
+            showNoButton();
+        }
+    });
+    window.addEventListener('scroll', () => {
+        if (STATE.noHoverCount === 0 && btnNo.classList.contains('visible')) {
+            showNoButton();
+        }
+    });
 });
