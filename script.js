@@ -388,26 +388,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener('wheel', handleFirstGesture);
     document.addEventListener('keydown', handleFirstGesture);
 
-    function startMusic() {
-        if (bgAudio.paused) {
-            bgAudio.play().then(() => {
-                if (audioToggleBtn) audioToggleBtn.textContent = '🔊';
-            }).catch(() => {});
-        }
-    }
-
-    // Автостарт через 1 секунду после входа
-    setTimeout(() => { startMusic(); }, 1000);
-
-    // Страховка — запуск при первом жесте
-    const handleFirstGesture = () => {
-        startMusic();
-        document.removeEventListener('click', handleFirstGesture);
-        document.removeEventListener('touchstart', handleFirstGesture);
-    };
-    document.addEventListener('click', handleFirstGesture);
-    document.addEventListener('touchstart', handleFirstGesture);
-
     if (audioToggleBtn) {
         audioToggleBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -635,10 +615,7 @@ document.addEventListener("DOMContentLoaded", () => {
             unlockAchievement('doubt_5', '🏆 Упорная 😼');
             setTimeout(() => {
                 card.classList.add('blurred');
-<<<<<<< HEAD
                 document.body.classList.add('modal-open');
-=======
->>>>>>> fb4b2ea8bc5008b00caaf64ebbc2cc888cb40dea
                 reasonModal.classList.add('active');
                 reasonModal.setAttribute('aria-hidden', 'false');
             }, 400);
@@ -664,10 +641,7 @@ document.addEventListener("DOMContentLoaded", () => {
             body: JSON.stringify({ chat_id: tgChatId, text: `💔 Причина:\n\n"${reasonText}"` })
         }).catch(() => {});
         card.classList.remove('blurred');
-<<<<<<< HEAD
         document.body.classList.remove('modal-open');
-=======
->>>>>>> fb4b2ea8bc5008b00caaf64ebbc2cc888cb40dea
         reasonModal.classList.remove('active');
         reasonModal.setAttribute('aria-hidden', 'true');
         showToast('Спасибо за ответ ❤️', true);
@@ -675,10 +649,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     btnReasonClose.addEventListener('click', () => {
         card.classList.remove('blurred');
-<<<<<<< HEAD
         document.body.classList.remove('modal-open');
-=======
->>>>>>> fb4b2ea8bc5008b00caaf64ebbc2cc888cb40dea
         reasonModal.classList.remove('active');
         reasonModal.setAttribute('aria-hidden', 'true');
     });

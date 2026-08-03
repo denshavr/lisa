@@ -893,7 +893,6 @@ body.theme-night .gradient-bg::after {
 .modal-overlay {
     z-index: 10500;
 }
-<<<<<<< HEAD
 
 /* ==========================================
    АДАПТИВНОСТЬ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ
@@ -941,5 +940,3 @@ body.theme-night .gradient-bg::after {
         flex-shrink: 1;
     }
 }
-=======
->>>>>>> fb4b2ea8bc5008b00caaf64ebbc2cc888cb40dea
