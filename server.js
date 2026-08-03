@@ -5,8 +5,8 @@ const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 
 const app = express();
-// На Amvera трафик идёт на 80, локально используем 3000
-const PORT = process.env.PORT || 3000;
+// На Amvera слушаем 80 порт (или из env), локально через bat-файл передаётся PORT=3000
+const PORT = process.env.PORT || 80;
 
 app.use(cors());
 app.use(express.json());

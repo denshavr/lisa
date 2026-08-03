@@ -11,4 +11,7 @@ run:
   env:
     - name: DATA_DIR
       value: /data
+    - name: PORT
+      value: "80"
+
 

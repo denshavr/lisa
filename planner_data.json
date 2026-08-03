@@ -1,16 +1,16 @@
 {
-  "2026-07-31": {
-    "sleepStart": "",
-    "sleepEnd": "",
-    "weightStart": "",
+  "2026-08-03": {
+    "sleepStart": "00:45",
+    "sleepEnd": "11:35",
+    "weightStart": "66.00",
     "weightEnd": "",
     "meals": {
       "breakfast": {
-        "text": "",
+        "text": "Святой дух",
         "done": false
       },
       "lunch": {
-        "text": "",
+        "text": "Кофе + тортик",
         "done": false
       },
       "dinner": {
@@ -23,8 +23,78 @@
       "endTime": "",
       "desc": ""
     },
-    "study": [],
-    "todos": [],
+    "study": [
+      {
+        "task": "Почитать (именно книгу)",
+        "done": false
+      }
+    ],
+    "todos": [
+      {
+        "task": "Убрать у курей ",
+        "done": false
+      },
+      {
+        "task": "Дать воды и еды ",
+        "done": true
+      },
+      {
+        "task": "Сделать маме педикюр",
+        "done": false
+      },
+      {
+        "task": "Переделать маникюр ",
+        "done": false
+      },
+      {
+        "task": "Сходить в магазин ",
+        "done": false
+      },
+      {
+        "task": "Убрать кровать ",
+        "done": false
+      },
+      {
+        "task": "Помыть и убрать посуду ",
+        "done": false
+      },
+      {
+        "task": "Взвесить курицу",
+        "done": false
+      },
+      {
+        "task": "Отпинать собаку:D",
+        "done": true
+      },
+      {
+        "task": "Отпиздить соседку:D",
+        "done": false
+      },
+      {
+        "task": "Покосить траву ",
+        "done": false
+      },
+      {
+        "task": "Заморозить кабачки ",
+        "done": false
+      },
+      {
+        "task": "Тренировка на пресс",
+        "done": false
+      },
+      {
+        "task": "Погулять ",
+        "done": false
+      },
+      {
+        "task": "Послать даню нахуй:D",
+        "done": true
+      },
+      {
+        "task": "Не сдохнуть от дел:D",
+        "done": false
+      }
+    ],
     "customBlocks": []
   }
 }
