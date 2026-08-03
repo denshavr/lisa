@@ -4,11 +4,10 @@ npm-debug.log*
 .npm
 
 # === Локальная база данных ===
+*.sqlite
 *.sqlite3
 *.db
 *.sqlite-journal
-# Трекинг начального database.sqlite для Амверы
-!database.sqlite
 
 # === Временные файлы ===
 .DS_Store

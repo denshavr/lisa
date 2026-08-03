@@ -168,13 +168,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (res.ok) {
                     const serverData = await res.json();
                     for (const [dKey, dBlocks] of Object.entries(serverData)) {
-                        if (!allData[dKey]) {
-                            allData[dKey] = dBlocks;
-                        } else {
-                            ensureProfileStructure(dKey);
-                            if (dBlocks && dBlocks.girl) allData[dKey].girl = { ...dBlocks.girl, ...allData[dKey].girl };
-                            if (dBlocks && dBlocks.boy) allData[dKey].boy = { ...dBlocks.boy, ...allData[dKey].boy };
-                        }
+                        // Всегда записываем серверные данные в allData[dKey]
+                        allData[dKey] = dBlocks;
+                        // Мигрируем старый плоский формат в { girl, boy }
+                        ensureProfileStructure(dKey);
                     }
                     saveLocalCache();
                     renderDashboard();
