@@ -8,6 +8,3 @@ build:
 run:
   command: npm start
   persistenceMount: /data
-  env:
-    - name: DATA_DIR
-      value: /data

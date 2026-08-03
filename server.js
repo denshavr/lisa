@@ -15,16 +15,23 @@ app.use(express.json());
 // Отдаем все статические файлы из текущей директории
 app.use(express.static(__dirname));
 
-// На Amvera данные хранятся в постоянном хранилище /data
-const DATA_DIR = process.env.DATA_DIR || __dirname;
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+// Автоматически определяем, находимся ли мы на Amvera
+const isAmvera = process.env.AMVERA === '1' || fs.existsSync('/data');
+const DATA_DIR = isAmvera ? '/data' : __dirname;
+if (!fs.existsSync(DATA_DIR)) {
+    try {
+        fs.mkdirSync(DATA_DIR, { recursive: true });
+    } catch (e) {
+        console.error('Не удалось создать директорию данных:', e);
+    }
+}
 
 const DB_PATH = path.join(DATA_DIR, 'database.sqlite');
 const LOCAL_SEED_DB = path.join(__dirname, 'database.sqlite');
 
 // Если мы на Amvera (/data) и файл /data/database.sqlite еще не существует,
-// копируем существуюущую базу данных database.sqlite из репозитория в /data/database.sqlite
-if (DATA_DIR !== __dirname && !fs.existsSync(DB_PATH) && fs.existsSync(LOCAL_SEED_DB)) {
+// копируем существующую базу данных database.sqlite из репозитория в /data/database.sqlite
+if (isAmvera && !fs.existsSync(DB_PATH) && fs.existsSync(LOCAL_SEED_DB)) {
     try {
         fs.copyFileSync(LOCAL_SEED_DB, DB_PATH);
         console.log('Существующая база database.sqlite скопирована в постоянное хранилище /data/database.sqlite');
