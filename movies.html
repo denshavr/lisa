@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Киношка 📺</title>
+    <meta name="theme-color" content="#ff4d6d">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="movies.css">
+</head>
+<body class="movies-page-body">
+    <div class="gradient-bg" id="bg-a"></div>
+    <div class="gradient-bg" id="bg-b" style="opacity:0"></div>
+    <canvas id="background-canvas"></canvas>
+
+    <main class="movies-container">
+        <!-- Шапка -->
+        <header class="movies-header">
+            <a href="index.html" class="back-btn" aria-label="Назад">← Назад</a>
+            <h1 id="movies-title">Киношка 📺</h1>
+            <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+                <button id="profile-toggle-btn" class="profile-toggle-btn" title="Сменить профиль">👦</button>
+            </div>
+        </header>
+
+        <!-- Форма добавления нового фильма -->
+        <section class="add-movie-section card">
+            <h2 id="add-movie-title">Добавить предложение</h2>
+            <div class="add-movie-form">
+                <input type="text" id="movie-title" class="movie-input" placeholder="Название (например: Интерстеллар)" required>
+                <input type="url" id="movie-link" class="movie-input" placeholder="Ссылка для просмотра (необязательно)">
+                <div class="form-row">
+                    <select id="movie-category" class="movie-select">
+                        <option value="films">🎬 Фильмы</option>
+                        <option value="series">🍿 Сериалы</option>
+                        <option value="anime">⛩️ Аниме</option>
+                    </select>
+                    <button id="btn-add-movie" class="btn btn-add-movie-submit">Добавить 🎬</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Списки по категориям -->
+        <section class="movies-lists">
+            <!-- Вкладки категорий -->
+            <div class="category-tabs">
+                <button class="tab-btn active" data-tab="films">🎬 Фильмы</button>
+                <button class="tab-btn" data-tab="series">🍿 Сериалы</button>
+                <button class="tab-btn" data-tab="anime">⛩️ Аниме</button>
+            </div>
+
+            <!-- Контейнеры списков -->
+            <div class="tab-content card">
+                <div id="movies-list-container" class="movies-list-container">
+                    <div class="loader">Загрузка...</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Нижняя панель навигации -->
+    <div class="audio-control-panel">
+        <div class="control-item">
+            <a href="index.html" class="audio-btn" id="home-link" aria-label="На главную">❤️</a>
+            <span class="control-label">Главная</span>
+        </div>
+        <div class="control-item">
+            <a href="planner.html" class="audio-btn" id="planner-link" aria-label="Открыть ежедневник">📖</a>
+            <span class="control-label">Дневничок</span>
+        </div>
+        <div class="control-item volume-control-container" id="volume-control-container">
+            <div class="audio-btn-wrapper">
+                <button class="audio-btn" id="audio-toggle" aria-label="Включить / Выключить музыку">🔊</button>
+                <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="1"
+                    aria-label="Громкость">
+            </div>
+            <span class="control-label">Звук</span>
+        </div>
+    </div>
+
+    <!-- Всплывающие Toasts -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="shared_audio.js"></script>
+    <script src="movies.js"></script>
+</body>
+</html>

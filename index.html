@@ -27,6 +27,12 @@
 
     <!-- Основной контейнер-карточка (Glassmorphism) -->
     <main class="card-container">
+        <!-- Таймер знакомства (скрыт при лоадере) -->
+        <div class="relationship-timer" id="relationship-timer" style="opacity: 0;">
+            <span class="timer-label">Мы знакомы ❤️</span>
+            <span class="timer-value" id="relationship-time-val">Загрузка...</span>
+        </div>
+
         <div class="card" id="app-card">
 
             <!-- ЭКРАН 0: Загрузка -->
@@ -101,11 +107,26 @@
 
     <!-- Панель управления звуком и календарем -->
     <div class="audio-control-panel">
-        <a href="planner.html" class="audio-btn" id="planner-link" aria-label="Открыть ежедневник">📖</a>
-        <button class="audio-btn" id="calendar-toggle" aria-label="Открыть список встреч">📅</button>
-        <button class="audio-btn" id="audio-toggle" aria-label="Включить / Выключить музыку">🔊</button>
-        <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="1"
-            aria-label="Громкость">
+        <div class="control-item">
+            <a href="planner.html" class="audio-btn" id="planner-link" aria-label="Открыть ежедневник">📖</a>
+            <span class="control-label">Дневничок</span>
+        </div>
+        <div class="control-item">
+            <button class="audio-btn" id="calendar-toggle" aria-label="Открыть список встреч">📅</button>
+            <span class="control-label">Встречи</span>
+        </div>
+        <div class="control-item">
+            <a href="movies.html" class="audio-btn" id="movies-link" aria-label="Открыть киношку">📺</a>
+            <span class="control-label">Киношка</span>
+        </div>
+        <div class="control-item volume-control-container" id="volume-control-container">
+            <div class="audio-btn-wrapper">
+                <button class="audio-btn" id="audio-toggle" aria-label="Включить / Выключить музыку">🔊</button>
+                <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="1"
+                    aria-label="Громкость">
+            </div>
+            <span class="control-label">Звук</span>
+        </div>
     </div>
     <!-- Кнопка НЕТ: живёт в body, НИКОГДА не скрывается родителем -->
     <button class="btn btn-no" id="btn-no">
@@ -153,6 +174,7 @@
     </div>
 
     <!-- Подключаем JavaScript логику -->
+    <script src="shared_audio.js"></script>
     <script src="script.js"></script>
 </body>
 

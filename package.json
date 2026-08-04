@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "build:www": "node -e \"const fs = require('fs'), path = require('path'); if (!fs.existsSync('www')) fs.mkdirSync('www'); ['index.html', 'planner.html', 'planner.js', 'planner.css', 'style.css', 'script.js', 'icon-192.png', 'icon-512.png', 'site.webmanifest'].forEach(f => { if (fs.existsSync(f)) fs.copyFileSync(f, path.join('www', f)); });\"",
+    "build:www": "node build_www.js",
     "cap:sync": "npm run build:www && npx cap sync",
     "cap:open": "npx cap open android"
   },
@@ -14,9 +14,13 @@
     "@capacitor/android": "^8.5.0",
     "@capacitor/cli": "^8.5.0",
     "@capacitor/core": "^8.5.0",
+    "@capgo/capacitor-native-audio": "^8.4.19",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "http-server": "^14.1.1",
     "sql.js": "^1.14.1"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5"
   }
 }

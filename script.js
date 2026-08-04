@@ -23,13 +23,42 @@ document.addEventListener("DOMContentLoaded", () => {
                             window.location.origin.startsWith('capacitor://') || 
                             window.location.origin.startsWith('file://');
         if (isCapacitor) {
-            let savedUrl = localStorage.getItem('amvera_server_url') || 'https://lisichka-date-request.amvera.media';
+            let savedUrl = localStorage.getItem('amvera_server_url') || 'https://lisichka-danilshavarin.amvera.io';
             if (savedUrl.endsWith('/')) {
                 savedUrl = savedUrl.slice(0, -1);
             }
             return savedUrl + endpoint;
         }
         return endpoint;
+    }
+
+    function initRelationshipTimer() {
+        const timerEl = document.getElementById('relationship-timer');
+        const valEl = document.getElementById('relationship-time-val');
+        if (!timerEl || !valEl) return;
+
+        // Познакомились 21 октября 2025 года
+        const startDate = new Date('2025-10-21T00:00:00');
+
+        function update() {
+            const now = new Date();
+            const diffMs = now - startDate;
+            if (diffMs < 0) {
+                valEl.textContent = 'Скоро познакомимся ❤️';
+                return;
+            }
+
+            const totalSeconds = Math.floor(diffMs / 1000);
+            const days = Math.floor(totalSeconds / (3600 * 24));
+            const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            valEl.textContent = `${days}д ${hours}ч ${minutes}мин ${seconds}сек`;
+        }
+
+        update();
+        setInterval(update, 1000);
     }
 
     // ==========================================
@@ -348,80 +377,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // ФОНОВАЯ МУЗЫКА ИЗ ПАПКИ music/
     // ==========================================
 
-    const bgAudio = new Audio('music/videoplayback (1).m4a');
-    bgAudio.loop = true;
-    
-    // Восстанавливаем сохраненную громкость из памяти браузера (или ставим 1 по умолчанию)
-    const savedVolume = localStorage.getItem('lisa_music_volume');
-    bgAudio.volume = savedVolume !== null ? parseFloat(savedVolume) : 1;
-    
-    const audioToggleBtn = document.getElementById('audio-toggle');
-    const volumeSlider = document.getElementById('volume-slider');
+    // Инициализируем общий аудио-плеер
+    window.SharedAudio.init();
 
-    if (volumeSlider) {
-        // Устанавливаем ползунок в загруженное положение
-        volumeSlider.value = bgAudio.volume;
-        
-        // Сразу меняем иконку, если при загрузке громкость на нуле
-        if (bgAudio.volume === 0 && audioToggleBtn) {
-            audioToggleBtn.textContent = '🔇';
-        }
 
-        volumeSlider.addEventListener('input', (e) => {
-            bgAudio.volume = e.target.value;
-            
-            // Сохраняем новую громкость в localStorage (память браузера)
-            localStorage.setItem('lisa_music_volume', e.target.value);
-            
-            // Если звук убавлен в 0, меняем иконку
-            if (bgAudio.volume === 0) {
-                audioToggleBtn.textContent = '🔇';
-            } else if (!bgAudio.paused) {
-                audioToggleBtn.textContent = '🔊';
-            }
-        });
-    }
-
-    function startMusic() {
-        if (bgAudio.paused) {
-            bgAudio.play().then(() => {
-                if (audioToggleBtn && bgAudio.volume > 0) audioToggleBtn.textContent = '🔊';
-            }).catch(() => {});
-        }
-    }
-
-    // Запуск музыки при любом первом взаимодействии со страницей
-    const handleFirstGesture = () => {
-        startMusic();
-        document.removeEventListener('click', handleFirstGesture);
-        document.removeEventListener('touchstart', handleFirstGesture);
-        document.removeEventListener('scroll', handleFirstGesture);
-        document.removeEventListener('wheel', handleFirstGesture);
-        document.removeEventListener('keydown', handleFirstGesture);
-    };
-    document.addEventListener('click', handleFirstGesture);
-    document.addEventListener('touchstart', handleFirstGesture);
-    document.addEventListener('scroll', handleFirstGesture);
-    document.addEventListener('wheel', handleFirstGesture);
-    document.addEventListener('keydown', handleFirstGesture);
-
-    if (audioToggleBtn) {
-        audioToggleBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (bgAudio.paused) {
-                bgAudio.play().then(() => {
-                    audioToggleBtn.textContent = '🔊';
-                    showToast('🎵 Музыка включена', true);
-                }).catch(() => {
-                    showToast('🎵 Нажмите ещё раз', true);
-                });
-            } else {
-                bgAudio.pause();
-                audioToggleBtn.textContent = '🔇';
-                showToast('🔇 Музыка выключена');
-            }
-        });
-    }
 
 
 
@@ -551,8 +510,16 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // Имитируем загрузку 1.5 секунды
     setTimeout(() => {
+        // Инициализируем таймер
+        initRelationshipTimer();
+        
         switchScreen(screenLoader, screenQuestion, () => {
             STATE.currentScreen = 'question';
+            
+            // Плавно показываем таймер
+            const rTimer = document.getElementById('relationship-timer');
+            if (rTimer) rTimer.style.opacity = '1';
+
             // Запускаем печать вопроса
             typeWriter("question-text", chosenQuestion, 55, () => {
                 // Показываем кнопку Да
@@ -628,9 +595,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Достижения
         if (STATE.noHoverCount === 1) unlockAchievement('doubt_1', '🏆 Первое сомнение');
-        if (STATE.noHoverCount === 5) {
-            unlockAchievement('doubt_5', '🏆 Упорная 😼');
+        if (STATE.noHoverCount % 5 === 0) {
+            if (STATE.noHoverCount === 5) {
+                unlockAchievement('doubt_5', '🏆 Упорная 😼');
+            }
             setTimeout(() => {
+                if (reasonInput) reasonInput.value = ''; // Очищаем поле ввода при повторном показе
                 card.classList.add('blurred');
                 document.body.classList.add('modal-open');
                 reasonModal.classList.add('active');
@@ -779,6 +749,9 @@ document.addEventListener("DOMContentLoaded", () => {
         
         // Скрываем кнопку «Нет» и сбрасываем её состояние
         hideNoButton();
+
+        // 🎵 Логика переключения музыки при согласии
+        window.SharedAudio.playGreetingMusic();
 
         // Переход на следующий экран выбора времени
         setTimeout(() => {

@@ -182,6 +182,57 @@ app.post('/api/planner/data', (req, res) => {
     }
 });
 
+// --- METADATA PROXY API ---
+app.get('/api/metadata/poster', async (req, res) => {
+    const videoUrl = req.query.url;
+    if (!videoUrl) return res.json({ posterUrl: null });
+
+    // 1. YouTube check
+    const ytReg = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = videoUrl.match(ytReg);
+    if (match && match[2].length === 11) {
+        return res.json({ posterUrl: `https://img.youtube.com/vi/${match[2]}/hqdefault.jpg` });
+    }
+
+    // 2. Fetch page and find OpenGraph tag
+    try {
+        const response = await fetch(videoUrl, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            },
+            signal: AbortSignal.timeout(4000) // 4 seconds timeout
+        });
+
+        if (response.ok) {
+            const html = await response.text();
+            
+            // Helper regex search for og:image or twitter:image
+            const extractOgImage = (htmlContent) => {
+                let m = htmlContent.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i);
+                if (m) return m[1];
+                m = htmlContent.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+                if (m) return m[1];
+                m = htmlContent.match(/<meta[^>]+name=["']og:image["'][^>]+content=["']([^"']+)["']/i);
+                if (m) return m[1];
+                m = htmlContent.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i);
+                if (m) return m[1];
+                return null;
+            };
+
+            let posterUrl = extractOgImage(html);
+            if (posterUrl) {
+                // Decode HTML entities if any
+                posterUrl = posterUrl.replace(/&amp;/g, '&');
+                return res.json({ posterUrl });
+            }
+        }
+    } catch (e) {
+        console.error('Failed to fetch og:image for url:', videoUrl, e.message);
+    }
+
+    res.json({ posterUrl: null });
+});
+
 app.listen(PORT, () => {
     console.log(`Сервер запущен на порту ${PORT}`);
 });

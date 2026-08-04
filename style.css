@@ -490,7 +490,7 @@ body.final-blur .gradient-bg {
 /* ВСПЛЫВАЮЩИЕ TOASTS — плавные, живут дольше */
 .toast-container {
     position: fixed;
-    top: max(16px, env(safe-area-inset-top, 16px));
+    top: 100px; /* Сдвигаем ниже таймера */
     left: 50%;
     transform: translateX(-50%);
     z-index: 400;
@@ -501,6 +501,7 @@ body.final-blur .gradient-bg {
     width: 90%;
     max-width: 440px;
     pointer-events: none;
+    transition: top 0.3s ease;
 }
 
 .toast {
@@ -699,15 +700,32 @@ body.final-blur .gradient-bg {
     z-index: 10000;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
     background: rgba(20, 5, 35, 0.6);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
-    border-radius: 30px;
-    padding: 6px 14px 6px 6px;
-    transition: background 0.3s ease;
+    border-radius: 24px;
+    padding: 10px 18px;
+    transition: background 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+}
+
+.control-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+}
+
+.control-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.65);
+    font-family: var(--font-heading);
+    pointer-events: none;
+    letter-spacing: 0.5px;
 }
 
 /* Скрытие элементов, когда открыто модальное окно */
@@ -719,6 +737,11 @@ body.modal-open .btn-no {
 
 body.modal-open .audio-control-panel {
     transform: translateY(20px);
+}
+
+.audio-btn-wrapper {
+    display: flex;
+    align-items: center;
 }
 
 .audio-btn {
@@ -738,7 +761,7 @@ body.modal-open .audio-control-panel {
 }
 
 .audio-btn:hover {
-    transform: scale(1.15) rotate(5deg);
+    transform: scale(1.1) rotate(3deg);
     background: rgba(255, 255, 255, 0.1);
 }
 
@@ -749,12 +772,30 @@ body.modal-open .audio-control-panel {
 .volume-slider {
     -webkit-appearance: none;
     appearance: none;
-    width: 80px;
+    width: 0;
+    opacity: 0;
+    margin-left: 0;
     height: 4px;
     background: rgba(255, 255, 255, 0.2);
     border-radius: 2px;
     outline: none;
     cursor: pointer;
+    transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s ease, margin-left 0.3s ease;
+    overflow: hidden;
+}
+
+.volume-slider.expanded {
+    width: 80px;
+    opacity: 1;
+    margin-left: 8px;
+}
+
+@media (min-width: 601px) {
+    .volume-control-container:hover .volume-slider {
+        width: 80px;
+        opacity: 1;
+        margin-left: 8px;
+    }
 }
 
 .volume-slider::-webkit-slider-thumb {
@@ -927,8 +968,8 @@ body.theme-night .gradient-bg::after {
         width: calc(100vw - 24px);
         max-width: 360px;
         justify-content: space-around;
-        padding: 6px 12px;
-        gap: 4px;
+        padding: 8px 12px;
+        gap: 6px;
         border-radius: 25px;
     }
 
@@ -940,7 +981,77 @@ body.theme-night .gradient-bg::after {
     }
 
     .volume-slider {
-        width: 55px;
+        width: 0;
+        opacity: 0;
+        margin-left: 0;
+        flex-shrink: 0;
+    }
+
+    .volume-slider.expanded {
+        width: 70px;
+        opacity: 1;
+        margin-left: 6px;
         flex-shrink: 1;
     }
+
+    .toast-container {
+        top: 80px !important;
+    }
 }
+
+/* ========== ТАЙМЕР ЗНАКОМСТВА ========== */
+.relationship-timer {
+    position: absolute;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 8px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255,255,255,0.05);
+    z-index: 600;
+    pointer-events: none;
+    text-align: center;
+    width: max-content;
+    max-width: 90vw;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.timer-label {
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.timer-value {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    font-family: var(--font-ui);
+    letter-spacing: 0.5px;
+}
+
+@media (max-width: 600px) {
+    .relationship-timer {
+        top: 20px;
+        padding: 6px 18px;
+    }
+    .timer-label {
+        font-size: 0.72rem;
+    }
+    .timer-value {
+        font-size: 1.05rem;
+    }
+}
+

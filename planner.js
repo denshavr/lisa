@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             window.location.origin.startsWith('capacitor://') || 
                             window.location.origin.startsWith('file://');
         if (isCapacitor) {
-            let savedUrl = localStorage.getItem('amvera_server_url') || 'https://lisichka-date-request.amvera.media';
+            let savedUrl = localStorage.getItem('amvera_server_url') || 'https://lisichka-danilshavarin.amvera.io';
             if (savedUrl.endsWith('/')) {
                 savedUrl = savedUrl.slice(0, -1);
             }
@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const netBadge = document.getElementById('network-status-badge');
     if (netBadge) {
         netBadge.addEventListener('click', () => {
-            const currentUrl = localStorage.getItem('amvera_server_url') || 'https://lisichka-date-request.amvera.media';
+            const currentUrl = localStorage.getItem('amvera_server_url') || 'https://lisichka-danilshavarin.amvera.io';
             const newUrl = prompt('Введите адрес сервера Amvera для синхронизации:', currentUrl);
             if (newUrl !== null) {
                 const trimmed = newUrl.trim();
@@ -203,6 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (res.ok) {
                     const serverData = await res.json();
                     for (const [dKey, dBlocks] of Object.entries(serverData)) {
+                        if (dKey.startsWith('__')) continue;
                         // Всегда записываем серверные данные в allData[dKey]
                         allData[dKey] = dBlocks;
                         // Мигрируем старый плоский формат в { girl, boy }
@@ -747,5 +748,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Инициализация
+    window.SharedAudio.init();
     loadData();
 });

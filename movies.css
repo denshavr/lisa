@@ -1,0 +1,490 @@
+/* ==========================================
+   СТИЛИ ДЛЯ КИНОШКИ (MOVIES / ANIME)
+   ========================================== */
+
+.movies-page-body {
+    background: linear-gradient(135deg, #100b26 0%, #220833 50%, #3d053d 100%);
+    background-size: cover;
+    background-attachment: fixed;
+}
+
+.movies-container {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    position: relative;
+    z-index: 10;
+}
+
+.movies-header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 25px;
+    padding-top: 10px;
+}
+
+.movies-header h1 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 4px 15px rgba(255, 75, 114, 0.3);
+    margin: 0;
+}
+
+.back-btn {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-right: 15px;
+    transition: color 0.2s, transform 0.2s;
+    display: inline-block;
+}
+
+.back-btn:hover {
+    color: #fff;
+    transform: translateX(-3px);
+}
+
+.profile-toggle-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    font-size: 1.6rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.profile-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.profile-toggle-btn:active {
+    transform: scale(0.95);
+}
+
+/* Переопределение глобального стиля .card для киношки */
+.movies-container .card {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    text-align: left !important;
+    min-height: auto !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* ФОРМА ДОБАВЛЕНИЯ ПРЕДЛОЖЕНИЙ */
+.add-movie-section {
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.add-movie-section h2 {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+    text-align: left;
+    align-self: flex-start;
+}
+
+.add-movie-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.movie-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 12px 14px;
+    color: #fff;
+    font-family: var(--font-ui);
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.25s ease;
+}
+
+.movie-input::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.movie-input:focus {
+    border-color: rgba(255, 75, 114, 0.6);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 15px rgba(255, 75, 114, 0.2);
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+}
+
+.movie-select {
+    flex: 1.2;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 12px;
+    color: #fff;
+    font-family: var(--font-ui);
+    font-size: 0.95rem;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.movie-select option {
+    background: #1a0b2e;
+    color: #fff;
+}
+
+.btn-add-movie-submit {
+    flex: 0.8;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: #fff;
+    padding: 12px 20px;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 15px rgba(255, 75, 114, 0.3);
+}
+
+/* ВКЛАДКИ (ТАБЫ) КАТЕГОРИЙ */
+.category-tabs {
+    display: flex;
+    width: 100%;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.tab-btn {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.7);
+    padding: 10px 4px;
+    border-radius: 14px;
+    font-family: var(--font-heading);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+    outline: none;
+}
+
+.tab-btn.active {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-color: var(--primary-color);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(255, 75, 114, 0.3);
+    transform: translateY(-1px);
+}
+
+.tab-content {
+    min-height: 250px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.movies-list-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* СЕТКА С ПОСТЕРАМИ ФИЛЬМОВ */
+.movies-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 16px;
+    width: 100%;
+}
+
+.movie-card {
+    position: relative;
+    aspect-ratio: 2 / 3;
+    border-radius: 18px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.movie-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    border-color: rgba(255, 75, 114, 0.4);
+    box-shadow: 0 10px 25px rgba(255, 75, 114, 0.25);
+}
+
+.movie-poster-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: linear-gradient(135deg, #2b0b3e 0%, #170526 100%);
+    transition: filter 0.3s ease;
+}
+
+/* Эффект черно-белого/затемненного для просмотренных фильмов */
+.movie-card.watched .movie-poster-img {
+    filter: grayscale(80%) brightness(0.4);
+}
+
+/* Пустой постер (если картинка не загрузилась) */
+.movie-poster-fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #3d0e5a 0%, #150227 100%);
+    padding: 12px;
+    box-sizing: border-box;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.movie-poster-fallback-icon {
+    font-size: 2.2rem;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 0 8px var(--primary-color));
+}
+
+.movie-poster-fallback-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Верхняя панель управления поверх постера */
+.movie-card-top-controls {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 15;
+    pointer-events: none; /* Пропускаем клик сквозь контейнер */
+}
+
+.movie-card-top-controls button,
+.movie-card-top-controls div {
+    pointer-events: auto; /* Но ловим клики на кнопках */
+}
+
+/* Круглый Чекбокс */
+.movie-card-checkbox {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    background: rgba(20, 5, 35, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    color: transparent;
+    font-size: 0.85rem;
+    font-weight: 800;
+}
+
+.movie-card-checkbox:hover {
+    transform: scale(1.1);
+    border-color: #10b981;
+}
+
+.movie-card-checkbox.checked {
+    background: #10b981;
+    border-color: #10b981;
+    color: #fff;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+/* Круглая корзина */
+.movie-card-delete {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    background: rgba(20, 5, 35, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+    border: none;
+    outline: none;
+}
+
+.movie-card-delete:hover {
+    transform: scale(1.1);
+    background: #ef4444;
+    border-color: #ef4444;
+    color: #fff;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
+/* Нижний градиентный оверлей с текстом */
+.movie-card-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(15, 5, 25, 0.95) 0%, rgba(15, 5, 25, 0.7) 60%, transparent 100%);
+    padding: 14px 10px 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 10;
+    transition: all 0.3s ease;
+}
+
+/* Для просмотренных оверлей бледнее */
+.movie-card.watched .movie-card-info {
+    background: linear-gradient(to top, rgba(15, 5, 25, 0.95) 0%, rgba(15, 5, 25, 0.85) 100%);
+}
+
+.movie-card-title-container {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-height: 1.25;
+}
+
+.movie-card-title-text {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fff;
+    text-decoration: none;
+    transition: color 0.2s;
+    word-break: break-word;
+}
+
+.movie-card-title-link {
+    color: #ff85a1;
+    border-bottom: 1px dashed rgba(255, 133, 161, 0.4);
+}
+
+.movie-card-title-link:hover {
+    color: #fff;
+    border-bottom-color: #fff;
+    text-shadow: 0 0 5px rgba(255, 133, 161, 0.5);
+}
+
+.movie-card.watched .movie-card-title-text {
+    text-decoration: line-through;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* Маленький бейдж автора внизу карточки */
+.movie-card-author {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    align-self: flex-start;
+}
+
+.movie-card-author.girl {
+    color: #ff7b93;
+}
+
+.movie-card-author.boy {
+    color: #60a5fa;
+}
+
+/* Пустое состояние */
+.empty-movies {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 40px 0;
+    text-align: center;
+}
+
+/* Лоадер */
+.loader {
+    color: var(--text-muted);
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin: 40px 0;
+    text-align: center;
+}
+
+/* АДАПТИВНОСТЬ ДЛЯ ТЕЛЕФОНОВ */
+@media (max-width: 480px) {
+    .movies-container {
+        padding: 12px 10px 100px 10px; /* Достаточно места для нижней панели */
+    }
+
+    .movies-header h1 {
+        font-size: 1.4rem;
+    }
+
+    .add-movie-section {
+        padding: 16px 14px;
+    }
+
+    .tab-content {
+        padding: 14px 10px;
+    }
+
+    .movies-grid {
+        grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+        gap: 10px;
+    }
+
+    .movie-card-info {
+        padding: 10px 6px 6px 6px;
+    }
+
+    .movie-card-title-text {
+        font-size: 0.82rem;
+    }
+
+    .movie-card-author {
+        font-size: 0.7rem;
+    }
+}
